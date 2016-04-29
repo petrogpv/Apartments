@@ -1,0 +1,90 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Calendar Upload</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+    <style>
+        td, th {
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none;   /* Chrome/Safari/Opera */
+            -khtml-user-select: none;    /* Konqueror */
+            -moz-user-select: none;      /* Firefox */
+            -ms-user-select: none;       /* IE/Edge */
+            user-select: none;
+            cursor: default;
+            text-align:center;
+        }
+        td {
+            height: 40px;
+            width: 50px;
+            text-align: center;
+            vertical-align: top;
+            padding-top: 10px;
+    }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <form id="myForm" >
+        <h3>New month</h3>
+        <select  id="month">
+            <option value="" disabled selected hidden>select month</option>
+            <c:forEach items="${months}" var="month">
+                <option value="${month.key}">${month.value}</option>
+            </c:forEach>
+        </select>
+        <select  id="year">
+            <c:forEach items="${years}" var="year">
+                <option value="${year}">${year}</option>
+            </c:forEach>
+        </select>
+
+        <input type="submit" class="btn btn-primary" value="Add">
+    </form>
+</div>
+<div id="content">
+</div>
+
+<script>
+    $(document).ready(function(){
+
+        $('#myForm').submit(function(e){
+            e.preventDefault();
+//            $.getScript()
+            $.ajax({
+                type: "POST",
+                url: "pricing_template_upload_page",
+//                context: document.body,
+                data:
+                "month="+$("#month").val()+"&" +
+                "year="+$("#year").val(),
+                dataType: 'text',
+                success: function(html){
+                    $("#content").html(html);
+                }
+//                success: function(responseText) {
+//                    $("#content").html(responseText);
+//                    $("#content").find("style").each(function(i) {
+//                        eval($(this).text());
+//                    });
+//                    $("#content").find("script").each(function(i) {
+//                        eval($(this).text());
+//                    });
+//                }
+            });
+            return false;
+        });
+
+    });
+
+</script>
+<script>
+    $('.selectpicker').selectpicker();
+</script>
+</body>
+</html>
