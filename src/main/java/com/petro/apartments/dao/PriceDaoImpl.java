@@ -29,7 +29,7 @@ public class PriceDaoImpl implements PriceDao{
     }
 
     @Override
-    public void change(Price price) {
+    public void edit(Price price) {
         entityManager.merge(price);
     }
 

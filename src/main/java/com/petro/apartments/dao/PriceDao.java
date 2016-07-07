@@ -9,7 +9,7 @@ import java.util.List;
 public interface PriceDao {
     void add (Price price);
     void delete (Price price);
-    void change (Price price);
+    void edit (Price price);
     List<Price> list (Apartment apartment);
     List<Price> list ();
     Price findOne (long id);

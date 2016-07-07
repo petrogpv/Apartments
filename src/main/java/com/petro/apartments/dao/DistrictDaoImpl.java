@@ -21,12 +21,22 @@ public class DistrictDaoImpl implements DistrictDao {
     }
 
     @Override
+    public void edit(District district) {
+        entityManager.merge(district);
+    }
+
+    @Override
     public void delete(District district) {
         entityManager.remove(district);
     }
 
     @Override
     public District findOne(long id) {
+        return entityManager.find(District.class,id);
+    }
+
+    @Override
+    public District getOne(long id) {
         return entityManager.getReference(District.class,id);
     }
 

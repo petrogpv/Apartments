@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -27,6 +28,8 @@ public class AppService {
     private OrderDao orderDao;
     @Autowired
     private PriceDao priceDao;
+    @Autowired
+    private ImageDao imageDao;
 
 
     @Transactional
@@ -50,14 +53,25 @@ public class AppService {
         return apartmentDao.findMany(ids);
     }
     @Transactional
-    public Apartment findOneApartment (long id){
-        return apartmentDao.findOne(id);
+    public List<Apartment> getManyApartments(long [] ids){
+        return apartmentDao.getMany(ids);
     }
-
+    @Transactional
+    public Apartment findOneApartment (long id){
+        return apartmentDao.findOne(id) ;
+    }
+    @Transactional
+    public Apartment getOneApartment (long id){
+        return apartmentDao.getOne(id) ;
+    }
 
     @Transactional
     public void addDistrict (District district){
         districtDao.add(district);
+    }
+    @Transactional
+    public void editDistrict (District district) {
+        districtDao.edit(district);
     }
     @Transactional
     public void deleteDistrict (District district){
@@ -68,8 +82,14 @@ public class AppService {
         return districtDao.findOne(id);
     }
     @Transactional
+    public District getDistrict (long id){
+        return districtDao.getOne(id);
+    }
+    @Transactional
     public List<District> listDistricts (){
-        return districtDao.list();
+        List<District> districts = districtDao.list();
+        districts.sort(Comparator.comparing(District::getName));
+        return districts;
     }
 
 
@@ -100,8 +120,8 @@ public class AppService {
     }
 
     @Transactional
-    public void changePrice (Price price) {
-        priceDao.change(price);
+    public void editPrice (Price price) {
+        priceDao.edit(price);
     }
 
     @Transactional
@@ -122,6 +142,26 @@ public class AppService {
     @Transactional
     public void delete(Price price) {
         priceDao.delete(price);
+    }
+
+    @Transactional
+    public void addImage(Image image){
+        imageDao.add(image);
+    }
+
+    @Transactional
+    public void deleteImage(Image image) {
+        imageDao.delete(image);
+    }
+
+    @Transactional
+    public List<Image> listImages(Apartment apartment) {
+        return imageDao.list(apartment);
+    }
+
+    @Transactional
+    public Image findOneImage(long id) {
+        return imageDao.findOne(id);
     }
 
 

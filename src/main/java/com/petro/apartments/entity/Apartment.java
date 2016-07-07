@@ -21,8 +21,11 @@ public class Apartment {
     @OneToMany(mappedBy="apartment", cascade=CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Booking> bookings = new ArrayList<Booking>();
 
-    @OneToMany(mappedBy = "apartment", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "apartment", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
     List<Price> prices = new ArrayList<>();
+
+    @OneToMany(mappedBy = "apartment", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    List<Image> images = new ArrayList<>();
 
     @NotNull
     private String street;
@@ -115,5 +118,11 @@ public class Apartment {
         this.longtitude = longtitude;
     }
 
+    public List<Image> getImages() {
+        return images;
+    }
 
+    public void setImages(List<Image> images) {
+        this.images = images;
+    }
 }

@@ -11,6 +11,8 @@ public interface ApartmentDao {
     void delete (Apartment apartment);
     List<Apartment> list (District district);
     List<Apartment> list ();
+    List<Apartment> getMany(long [] ids);
     List<Apartment> findMany(long [] ids);
+    Apartment getOne(long id);
     Apartment findOne(long id);
 }

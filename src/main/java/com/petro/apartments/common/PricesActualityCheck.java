@@ -36,7 +36,7 @@ public class PricesActualityCheck extends TimerTask{
             for (Price price : prices) {
                 if (price.getDate_to() != null && price.getDate_to() == today) {
                     price.setArchive(today, "Auto");
-                    appService.changePrice(price);
+                    appService.editPrice(price);
                 }
             }
         }

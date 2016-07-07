@@ -120,8 +120,8 @@
         <tr>
             <td>
                 <form action="/pricing_upload" id="form_${apartment.id}"  method="post">
-                    <input type="hidden" name="aptId" value=${apartment.id}>
-                    <input type="submit" name="form_${apartment.id}" id = "change_${price.id}" class="btn btn-primary" value=">">
+                    <input type="hidden" name="apartmentId" value=${apartment.id}>
+                    <input type="submit" name="form_${apartment.id}" id = "${apartment.id}" class="btn btn-primary" value=">">
                 </form>
 
             <td>${apartment.street}</td>

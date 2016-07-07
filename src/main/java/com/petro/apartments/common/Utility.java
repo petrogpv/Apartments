@@ -22,13 +22,12 @@ public class Utility {
     }
 
     public static Apartment getApartmentWithActualPrices (Apartment apartment){
-//        pricesExpirationControl();
         List<Price> prices = apartment.getPrices();
         if(prices.size()!=0) {
             Iterator<Price> iter = prices.iterator();
             long now = Calendar.getInstance().getTime().getTime();
             while (iter.hasNext()) {
-                if(iter.next().getRevelance().equals("Expired")) {
+                if(iter.next().getRevelance().equals("Archive")) {
                     iter.remove();
                     continue;
                 }
@@ -96,70 +95,26 @@ public static Map<String,List<Price>> separatePrices (List<Price> prices){
     return map;
 
 }
-    public static List<Price> getActualPrices (List<Price> prices){
+    public static List<Price> getPricesByRevelance(List<Price> prices, String revelance){
         List<Price> result= new ArrayList<>();
 
-        result.addAll(getActualPricesByType(prices,1));
-        result.addAll(getActualPricesByType(prices,2));
-        result.addAll(getActualPricesByType(prices,3));
+        result.addAll(getPricesByRevelanceAndType(prices,revelance,1));
+        result.addAll(getPricesByRevelanceAndType(prices,revelance,2));
+        result.addAll(getPricesByRevelanceAndType(prices,revelance,3));
 
         return result;
 
     }
 
-    public static List<Price> getActualPricesByType (List<Price> prices, int type){
+    public static List<Price> getPricesByRevelanceAndType(List<Price> prices, String revelance, int type){
         List<Price> pricesActual = new ArrayList<>();
         for (Price p :prices) {
-            if(p.getType()==type && p.getRevelance().equals("actual"))
+            if(p.getType()==type && p.getRevelance().equals(revelance))
                 pricesActual.add(p);
         }
         Collections.sort(pricesActual,Collections.reverseOrder());
         return pricesActual;
     }
 
-//    public static void pricesExpirationControl() {
-//        if (lastDayChange == null) {
-//            lastDayChange = new Date();
-//            lastDayChange.setTime(0);
-//        }
-//        Date today = Utility.getStartOfToday();
-//        if (lastDayChange.getTime() == today.getTime()) {
-//            return;
-//        }
-//
-//        List<Price> prices = AppController.appService.listPrices();
-//
-//        if (prices.size() == 0) {
-//            return;
-//        }
-//        for (Price price : prices) {
-//            if (price.getDate_to() != null && price.getDate_to() == today) {
-//                price.setArchive(today, "Auto");
-//                AppController.appService.changePrice(price);
-//            }
-//        }
-//        lastDayChange = today;
-//
-//    }
 
-//    public static void pricesExpirationControl (){
-//        if(lastDayChange==null){
-//            lastDayChange = new Date();
-//            lastDayChange.setTime(0);
-//        }
-//        Date today  = getStartOfToday();
-//        if(lastDayChange.getTime() == today.getTime()){
-//            return;
-//        }
-//        List<Price> prices = appService.listPrices();
-//        if(prices.size()==0){
-//            return;
-//        }
-//        for (Price price:prices) {
-//            if(price.getDate_to()!=null&&price.getDate_to()==today){
-//                price.setArchive(today,"Auto");
-//            }
-//        }
-//        lastDayChange=today;
-//    }
 }

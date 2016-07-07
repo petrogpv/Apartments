@@ -117,7 +117,7 @@
             <h3>Pricing template upload for ${monthString} ${year}</h3>
 
             <form action="/calendar_upload" method="post">
-                <h5>Default pricing model - all days in month will be priced by Type 1 prices. Choose options below to change pricing model.</h5>
+                <h5>Default pricing model - all days in month will be priced by Type 1 prices. Choose options below to edit pricing model.</h5>
                 <input type="checkbox" name="weekends" value="1">Weekends pricing by Type 2 prices<Br>
                 <p>Choose holidays pricing by Type 3 or leave blank:</p>
 

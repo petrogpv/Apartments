@@ -3,7 +3,6 @@ package com.petro.apartments.dao;
 import com.petro.apartments.common.Utility;
 import com.petro.apartments.entity.Apartment;
 import com.petro.apartments.entity.District;
-import com.petro.apartments.entity.Price;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -20,7 +19,7 @@ public class ApartmentDaoImpl implements ApartmentDao {
 
     @Override
     public void add(Apartment apartment) {
-        entityManager.merge(apartment);
+        entityManager.persist(apartment);
     }
 
     @Override
@@ -42,19 +41,33 @@ public class ApartmentDaoImpl implements ApartmentDao {
     }
 
     @Override
-    public List<Apartment> findMany(long[] ids) {
+    public List<Apartment> getMany(long[] ids) {
         List<Apartment> list = new ArrayList<>();
         for (long id:ids) {
-            list.add(findOne(id));
+            list.add(getOne(id));
         }
         return list;
     }
 
     @Override
-    public Apartment findOne(long id) {
+    public List<Apartment> findMany(long[] ids) {
+        List<Apartment> list = new ArrayList<>();
+        for (long id:ids) {
+            list.add(findOne(id));
+        }
+        return null;
+    }
+
+    @Override
+    public Apartment getOne(long id) {
 //        Query query = entityManager.createQuery("SELECT a FROM Apartment a WHERE a.id = :id", Apartment.class);
 //        query.setParameter("id", id);
 //        (Apartment)query.getSingleResult();
-        return Utility.getApartmentWithActualPrices(entityManager.find(Apartment.class,id));
+        return entityManager.getReference(Apartment.class,id);
+    }
+
+    @Override
+    public Apartment findOne(long id) {
+        return entityManager.find(Apartment.class,id);
     }
 }

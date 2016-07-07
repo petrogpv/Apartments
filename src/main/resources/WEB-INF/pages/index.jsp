@@ -19,16 +19,16 @@
                         <ul id="groupList" class="nav navbar-nav">
                             <li><button type="button" id="pricing_upload" class="btn btn-default navbar-btn">Pricing upload</button></li>
                             <li><button type="button" id="calendar_upload" class="btn btn-default navbar-btn">Calendar upload</button></li>
-                            <li><button type="button" id="add_apartment" class="btn btn-default navbar-btn">Add Apartment</button></li>
-                            <li><button type="button" id="add_district" class="btn btn-default navbar-btn">Add District</button></li>
+                            <li><button type="button" id="apartments" class="btn btn-default navbar-btn">Apartments</button></li>
+                            <li><button type="button" id="districts" class="btn btn-default navbar-btn">Districts</button></li>
 
                             <li><button type="button" id="delete_group" class="btn btn-default navbar-btn">Delete Group</button></li>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Districts <span class="caret"></span></a>
                                 <ul class="dropdown-menu">
-                                    <%--<li><a href="/">Default</a></li>--%>
+                                    <li><a href="/">All</a></li>
                                     <c:forEach items="${districts}" var="district">
-                                        <li><a href="/">${district.name}</a></li>
+                                        <li><a href="/${district.id}">${district.name}</a></li>
                                     </c:forEach>
                                 </ul>
                             </li>
@@ -55,7 +55,12 @@
                 </thead>
                 <c:forEach items="${apartments}" var="apartment">
                     <tr>
-                        <td><input type="checkbox" name="toDelete[]" value="${apartment.id}" id="checkbox_${apartment.id}"/></td>
+                        <td>
+                            <form action="/apartment" id="form_${apartment.id}"  method="post">
+                                <input type="hidden" name="aptartmentId" value=${apartment.id}>
+                                <input type="submit" name="form_${apartment.id}" id = "${apartment.id}" class="btn btn-primary" value=">">
+                             </form>
+                        </td>
                         <td>${apartment.street}</td>
                         <td>${apartment.building}</td>
                         <td>${apartment.aptNumber}</td>
@@ -69,12 +74,12 @@
         <script>
             $('.dropdown-toggle').dropdown();
 
-            $('#add_apartment').click(function(){
-                window.location.href='/apartment_add_page';
+            $('#apartments').click(function(){
+                window.location.href='/apartments_page';
             })
 
-            $('#add_district').click(function(){
-                window.location.href='/district_add_page';
+            $('#districts').click(function(){
+                window.location.href='/districts_page';
             })
 
             $('#calendar_upload').click(function(){
