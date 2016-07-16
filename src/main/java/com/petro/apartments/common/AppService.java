@@ -37,6 +37,10 @@ public class AppService {
         apartmentDao.add(apartment);
     }
     @Transactional
+    public void editApartment(Apartment apartment) {
+        apartmentDao.edit(apartment);
+    }
+    @Transactional
     public void deleteApartment (Apartment apartment){
         apartmentDao.delete(apartment);
     }
@@ -162,6 +166,10 @@ public class AppService {
     @Transactional
     public Image findOneImage(long id) {
         return imageDao.findOne(id);
+    }
+    @Transactional
+    public Image getOneImage(long id) {
+        return imageDao.getOne(id);
     }
 
 

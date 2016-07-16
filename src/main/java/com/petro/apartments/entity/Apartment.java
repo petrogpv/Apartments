@@ -21,10 +21,11 @@ public class Apartment {
     @OneToMany(mappedBy="apartment", cascade=CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Booking> bookings = new ArrayList<Booking>();
 
-    @OneToMany(mappedBy = "apartment", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     List<Price> prices = new ArrayList<>();
 
-    @OneToMany(mappedBy = "apartment", cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "apartment", cascade = {CascadeType.DETACH, CascadeType.REMOVE,}, fetch = FetchType.EAGER)
+//    , fetch = FetchType.EAGER orphanRemoval=true,
     List<Image> images = new ArrayList<>();
 
     @NotNull

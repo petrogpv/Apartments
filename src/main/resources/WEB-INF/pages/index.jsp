@@ -6,6 +6,21 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script>
+            $( document ).ready(function() {
+            $('input:radio').change(function() {
+                if ($(this).is(':checked')){ //radio is now checked
+                    $('input:checkbox').prop('checked', false); //unchecks all checkboxes
+                }
+            });
+
+            $('input:checkbox').change(function() {
+                if ($(this).is(':checked')){
+                    $('input:radio').prop('checked', false);
+                }
+            });
+            });
+        </script>
     </head>
 
     <body>
@@ -101,5 +116,6 @@
                 console.log('testing');
             });
         </script>
+
     </body>
 </html>

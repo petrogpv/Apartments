@@ -37,4 +37,9 @@ public class ImageDaoImpl implements ImageDao{
     public Image findOne(long id) {
         return entityManager.find(Image.class,id);
     }
+
+    @Override
+    public Image getOne(long id) {
+        return entityManager.getReference(Image.class,id);
+    }
 }

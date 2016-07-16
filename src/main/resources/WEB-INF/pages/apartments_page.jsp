@@ -32,7 +32,6 @@
                         </ul>
                     </li>
                 </ul>
-        </div>
 
 
 
@@ -77,8 +76,9 @@
                     </tr>
                 </c:forEach>
             </table>
-        <%--<script>--%>
-            <%--$('.selectpicker').selectpicker();--%>
-        <%--</script>--%>
+        </div>
+        <script>
+            $('.selectpicker').selectpicker();
+        </script>
     </body>
 </html>

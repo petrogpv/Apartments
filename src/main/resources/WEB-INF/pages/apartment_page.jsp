@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="css/slimbox2.css" type="text/css" media="screen" />
 </head>
 <body>
+<div class="container">
+
 <table class="table table-striped">
     <thead>
     <tr>
@@ -34,5 +36,6 @@
 <c:forEach items="${apartment.images}" var="image">
     <a target="_blank" style="padding: 5px" href=/photo/${apartment.id}/${image.filename}><img hight = "100" width="100" src="/photo/${apartment.id}/${image.filename}"></a>
 </c:forEach>
+</div>
 </body>
 </html>

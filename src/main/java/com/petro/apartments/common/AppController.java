@@ -146,44 +146,78 @@ public class AppController {
     public String apartmentAdd(@RequestParam(value = "districtId") long districtId,
                                @RequestParam String street,
                                @RequestParam String building,
-                               @RequestParam int aptNumber,
+                               @RequestParam (required = false)  Integer aptNumber,
                                @RequestParam MultipartFile[] photos,
                                Model model) throws IOException {
         District district = appService.findDistrict(districtId);
 
+        if(aptNumber==null){
+            aptNumber=0;
+        }
         Apartment apartment = new Apartment(district, street, building, aptNumber, 0, 0);
         appService.addApartment(apartment);
-        long id = apartment.getId();
-        File photosDirectory = new File(photosRootDirectory +"/"+id);
-        photosDirectory.mkdirs();
 
-        if(photos.length != 1 && photos[0].getSize()!=0) {
-            for (MultipartFile ph : photos) {
-                long nameId = System.currentTimeMillis();
-                String fileExt = ph.getOriginalFilename().substring(ph.getOriginalFilename().lastIndexOf("."));
-                String filename = String.valueOf(nameId).concat(fileExt);
-                appService.addImage(new Image(nameId, filename, apartment));
+        savePhotos(apartment,photos);
 
-                File image = new File(photosDirectory, filename);
-                image.createNewFile();
-                FileOutputStream fos = new FileOutputStream(image);
-                fos.write(ph.getBytes());
-                fos.close();
-            }
-        }
         model.addAttribute("districts", appService.listDistricts());
         model.addAttribute("apartments", appService.listApartments());
         return "apartments_page";
     }
 
     @RequestMapping(value = "/apartment_edit", method = RequestMethod.POST)
-    public String apartmentEdit(@RequestParam(value = "apartmentId") long apartmentId,
+    public String apartmentEdit(@RequestParam long apartmentId,
                                  Model model) {
+        model.addAttribute("apartment", appService.findOneApartment(apartmentId));
         model.addAttribute("districts", appService.listDistricts());
-        model.addAttribute("message", "District changed");
         return "apartment_edit_page";
     }
+    @RequestMapping(value = "/apartment/post_edit", method = RequestMethod.POST)
+    public String apartmentPostEdit(@RequestParam long districtId,
+                                    @RequestParam long apartmentId,
+                               @RequestParam String street,
+                               @RequestParam String building,
+                               @RequestParam (required = false) int aptNumber,
+                                    @RequestParam (required = false) long []  toDelete,
+                               @RequestParam MultipartFile[] photos,
+                               Model model) throws IOException {
+        int changes = 0;
+        Apartment apartment = appService.findOneApartment(apartmentId);
 
+        if(apartment.getDistrict().getId()!=districtId){
+            apartment.setDistrict(appService.findDistrict(districtId));
+            changes = 1;
+        }
+        if(!apartment.getStreet().equals(street)){
+            apartment.setStreet(street);
+            changes = 1;
+        }
+        if(!apartment.getBuilding().equals(building)){
+            apartment.setBuilding(building);
+            changes = 1;
+        }
+        if(apartment.getAptNumber()!=aptNumber){
+            apartment.setAptNumber(aptNumber);
+            changes = 1;
+        }
+
+        if(changes==1)
+        appService.editApartment(apartment);
+
+        if(toDelete!=null){
+            changes = 1;
+            for (long photoId:toDelete) {
+                        Image photo = appService.getOneImage(photoId);
+                        appService.deleteImage(photo);
+                File photoToDelete = new File(photosRootDirectory+"/"+apartment.getId(),photo.getFilename());
+                photoToDelete.delete();
+            }
+        }
+
+        model.addAttribute("message",(savePhotos(apartment,photos)||changes==1)?"Changes saved!":"There is no changes!");
+        model.addAttribute("districts", appService.listDistricts());
+        model.addAttribute("apartments", appService.listApartments());
+        return "apartments_page";
+    }
     @RequestMapping(value = "/apartment_delete", method = RequestMethod.POST)
     public String apartmentDelete(@RequestParam long apartmentId,
                                  Model model) throws IOException {
@@ -475,5 +509,28 @@ public class AppController {
 
         return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
     }
+
+    private boolean savePhotos (Apartment apartment, MultipartFile[] photos) throws IOException {
+        long id = apartment.getId();
+        File photosDirectory = new File(photosRootDirectory +"/"+id);
+        photosDirectory.mkdirs();
+        if (photos.length != 1 && photos[0].getSize() != 0) {
+            for (MultipartFile ph : photos) {
+                long nameId = System.currentTimeMillis();
+                String fileExt = ph.getOriginalFilename().substring(ph.getOriginalFilename().lastIndexOf("."));
+                String filename = String.valueOf(nameId).concat(fileExt);
+                appService.addImage(new Image(nameId, filename, apartment));
+
+                File image = new File(photosDirectory, filename);
+                image.createNewFile();
+                FileOutputStream fos = new FileOutputStream(image);
+                fos.write(ph.getBytes());
+                fos.close();
+            }
+            return  true;
+        }
+        return false;
+    }
+
 }
 

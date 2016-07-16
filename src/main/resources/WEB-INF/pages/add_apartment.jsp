@@ -5,28 +5,28 @@
     <title>New Apartment</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            $('#sub').click(function() {
+    <%--<script>--%>
+        <%--$(document).ready(function () {--%>
+            <%--$('#sub').click(function() {--%>
 
-                if($('#street').val().length == 0){
-                    alert('Please fill out "Street".');
-                    return false;
-                }
-                if($('#building').val().length == 0){
-                    alert('Please fill out "Street".');
-                    return false;
-                }
-                if($('#aptNumber').val().length == 0){
-                    alert('Please fill out "aptNumber".');
-                    return false;
-                }
+                <%--if($('#street').val().length == 0){--%>
+                    <%--alert('Please fill out "Street".');--%>
+                    <%--return false;--%>
+                <%--}--%>
+                <%--if($('#building').val().length == 0){--%>
+                    <%--alert('Please fill out "Street".');--%>
+                    <%--return false;--%>
+                <%--}--%>
+                <%--if($('#aptNumber').val().length == 0){--%>
+                    <%--alert('Please fill out "aptNumber".');--%>
+                    <%--return false;--%>
+                <%--}--%>
 
-            });
-        });
+            <%--});--%>
+        <%--});--%>
 
 
-    </script>
+    <%--</script>--%>
 </head>
 <body>
 <div class="container">
@@ -47,8 +47,5 @@
     </form>
 </div>
 
-<script>
-    $('.selectpicker').selectpicker();
-</script>
 </body>
 </html>

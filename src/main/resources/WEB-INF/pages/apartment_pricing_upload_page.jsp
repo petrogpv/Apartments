@@ -68,7 +68,7 @@
 
 </head>
 <body>
-
+<div class="container">
 
 <table class="table table-striped">
     <thead>
@@ -244,5 +244,6 @@
         </tr>
     </c:forEach>
 </table>
+</div>
 </body>
 </html>

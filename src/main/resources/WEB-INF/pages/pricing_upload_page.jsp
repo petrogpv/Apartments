@@ -105,7 +105,7 @@
     </ul>
     </li>
         </ul>
-</div>
+
 <table class="table table-striped">
     <thead>
     <tr>
@@ -133,6 +133,7 @@
     </c:forEach>
 
 </table>
+</div>
 </form>
 </body>
 </html>

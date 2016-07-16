@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface ApartmentDao {
     void add (Apartment apartment);
+    void edit (Apartment apartment);
     void delete (Apartment apartment);
     List<Apartment> list (District district);
     List<Apartment> list ();

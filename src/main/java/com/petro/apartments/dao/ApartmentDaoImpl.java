@@ -23,6 +23,11 @@ public class ApartmentDaoImpl implements ApartmentDao {
     }
 
     @Override
+    public void edit(Apartment apartment) {
+        entityManager.merge(apartment);
+    }
+
+    @Override
     public void delete(Apartment apartment) {
         entityManager.remove(apartment);
     }

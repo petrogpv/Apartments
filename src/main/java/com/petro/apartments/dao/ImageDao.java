@@ -11,5 +11,6 @@ public interface ImageDao {
     void delete (Image image);
     List<Image> list (Apartment apartment);
     Image findOne (long id);
+    Image getOne (long id);
 
 }
