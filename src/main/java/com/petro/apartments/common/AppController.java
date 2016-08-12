@@ -1,30 +1,36 @@
 package com.petro.apartments.common;
 
+import com.google.gson.Gson;
 import com.petro.apartments.entity.*;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.Principal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Controller
 @RequestMapping("/")
+@Scope("session")
+@SessionAttributes({"chartApartments","chartQuantity"})
 public class AppController {
 
     private static Map<Integer, String> months = new HashMap<Integer, String>() {{
@@ -45,14 +51,17 @@ public class AppController {
 
     @Autowired
     AppService appService;
-//    @Autowired
-//    PricesActualityCheck check;
-
-//    Boolean timerStart = false;
+    @Autowired
+    Utility utility;
 
     @RequestMapping("/")
-    public String index(Model model) throws ParseException {
-//        model.addAttribute("apartments", appService.listApartments());
+    public String index(HttpSession session,
+
+                        Model model) throws ParseException {
+        model.addAttribute("apartments", appService.listApartments());
+
+        if(session.getAttribute("chartQuantity")==null)
+            session.setAttribute("chartQuantity",0);
 
         model.addAttribute("districts", appService.listDistricts());
         model.addAttribute("apartments", appService.listApartments());
@@ -65,7 +74,28 @@ public class AppController {
         model.addAttribute("date", cal.getTime().getTime());
         return "index";
     }
+    @RequestMapping(value = "/login" , method = RequestMethod.GET)
+    public String loginPage(@RequestParam(value = "error", required = false) String error,
+                            @RequestParam(value = "logout", required = false) String logout, HttpServletRequest request,
+                            Model model){
 
+        if (error != null) {
+            model.addAttribute("error", getErrorMessage(request, "SPRING_SECURITY_LAST_EXCEPTION"));
+        }
+
+        if (logout != null) {
+            model.addAttribute("message", "You've been logged out successfully.");
+        }
+
+        return "login";
+    }
+    @RequestMapping(value = "/403", method = RequestMethod.GET)
+    public String accesssDenied(Principal  principal,
+                                Model model) {
+        model.addAttribute("username", principal.getName());
+        return "403";
+
+    }
     @RequestMapping("/{id}")
     public String indexDistrict (@PathVariable(value = "id") long districtId
             , Model model) {
@@ -76,22 +106,215 @@ public class AppController {
     }
 
     @RequestMapping(value = "/apartment", method = RequestMethod.POST)
-    public String apartment(@RequestParam(value = "aptartmentId") long apartmentId,
-                              Model model) {
+    public String apartment(@RequestParam(value = "apartmentId") long apartmentId,
+                            @RequestParam(required = false, value = "date") Long dateMillis,
+                            @RequestParam(required = false, value = "sub") String submit,
+                            @RequestParam(required = false, value = "bookings") Integer [] bookings,
+                            HttpServletRequest request,
+                            HttpSession session,
+                            Model model) {
+        if(submit !=null && submit.equals("Discard changes")){
+            request.setAttribute("forwarded",true);
+            return "forward:/chart_delete";
+        }
+        Map<Long,Map<Date,Set<Date>>> bookingsSession = (TreeMap<Long,Map<Date,Set<Date>>>) session.getAttribute("bookingsSession");
+
+        if(bookingsSession==null) {
+            bookingsSession = new TreeMap<>();
+        }
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(utility.getStartOfDay(cal.getTime()));
+
+        Calendar calToday = (Calendar) cal.clone();
         Apartment apartment = appService.findOneApartment(apartmentId);
 
-        model.addAttribute("apartment", apartment);
+        int today = 0;
+        int backward = 1;
+        int forward = 1;
+        int month;
 
+        if(dateMillis==null){
+            month = calToday.get(Calendar.MONTH);
+            today = calToday.get(Calendar.DAY_OF_MONTH);
+
+            backward = -1;
+            cal.set(Calendar.DAY_OF_MONTH,1);
+        }
+        else{
+            cal.setTimeInMillis(dateMillis);
+            cal.set(Calendar.DAY_OF_MONTH,1);
+
+
+            Calendar calToBook  = (Calendar)cal.clone();
+            Calendar calMonthDays = (Calendar)cal.clone();
+
+            Map<Date,Set<Date>> mapMonthDays = bookingsSession.get(apartmentId);
+
+
+            if(bookings!=null) {
+                if(mapMonthDays==null)
+                    mapMonthDays = new TreeMap<>();
+
+
+                Set<Date> datesToBook = new TreeSet<>();
+                for (int i = 0; i < bookings.length; i++) {
+                    calToBook.set(Calendar.DAY_OF_MONTH, bookings[i]);
+                    datesToBook.add(calToBook.getTime());
+                }
+                mapMonthDays.put(calMonthDays.getTime(),datesToBook);
+                bookingsSession.put(apartmentId,mapMonthDays);
+            }
+            else{
+                if(mapMonthDays!=null) {
+                    if (mapMonthDays.get(calMonthDays.getTime()) != null) {
+                        mapMonthDays.remove(calMonthDays.getTime());
+                        if (mapMonthDays.size() == 0) {
+                            bookingsSession.remove(apartmentId);
+                        }
+
+                    }
+                }
+            }
+
+            session.setAttribute("bookingsSession",bookingsSession);
+            model.addAttribute("chartQuantity",bookingsSession.size());
+            System.out.println("bookingsSession.size() :" + bookingsSession.size());
+            System.out.println("\"chartQuantity\") :" + session.getAttribute("chartQuantity"));
+
+            month = cal.get(Calendar.MONTH);
+
+            if(submit!=null && submit.equals("Save and go to other apartment")){
+                return "redirect:/";
+            }
+            if(submit!=null && submit.equals("Save and go to chart")){
+                return "redirect:/chart";
+            }
+
+            if(submit!=null && submit.equals(">"))
+                month++;
+            if(submit!=null && submit.equals("<"))
+                month--;
+
+            if(month==calToday.get(Calendar.MONTH)){
+                today = calToday.get(Calendar.DAY_OF_MONTH);
+                backward = -1;
+            }
+
+            cal.set(Calendar.MONTH,month);
+        }
+
+        Calendar calNext = Calendar.getInstance();
+        calNext.set(Calendar.MONTH,month+1);
+        if(appService.listMonthDays(calNext.getTime()).size()==0)
+            forward = -1;
+
+        if(appService.listMonthDays(cal.getTime()).size()!=0){
+            double [] daysPrices = utility.daysWhithPrices(apartment,cal.getTime());
+
+            int [] book = new int[daysPrices.length];
+            Calendar calBooks = (Calendar)cal.clone();
+
+            if(bookingsSession.size()!=0){
+                Map<Date,Set<Date>> monthBooked = bookingsSession.get(apartmentId);
+                if(monthBooked != null) {
+                    Set<Date> daysBooked = monthBooked.get(cal.getTime());
+                    if (daysBooked != null) {
+                        for (Date day : daysBooked) {
+                            calBooks.setTime(day);
+                            book[calBooks.get(Calendar.DAY_OF_MONTH)] = -1;
+                        }
+                    }
+                }
+            }
+
+            Gson gson = new Gson();
+            String prices = gson.toJson(daysPrices);
+            String books = gson.toJson(book);
+
+            int maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+            cal.set(Calendar.DAY_OF_MONTH,maxDay);
+
+            model.addAttribute("prices", prices);
+            model.addAttribute("bookings", books);
+            model.addAttribute("availableMonth",1);
+        }
+        else{
+            model.addAttribute("message", "There is no calendar uploaded for current month");
+            model.addAttribute("availableMonth",-1);
+        }
+
+        model.addAttribute("date",cal.getTime().getTime());
+        model.addAttribute("today",today);
+        model.addAttribute("forward", forward);
+        model.addAttribute("backward", backward);
+        model.addAttribute("apartment",apartment);
 
         return "apartment_page";
     }
-    @RequestMapping("/districts_page")
+
+    @RequestMapping(value = "/chart")
+    public String chart(HttpSession session,
+                        Model model) {
+        Map<Long,Map<Date,Set<Date>>> bookingsSession = (TreeMap<Long,Map<Date,Set<Date>>>) session.getAttribute("bookingsSession");
+        List <ChartApartment> apartments = new ArrayList<>();
+
+        if (bookingsSession!=null) {
+            for (Map.Entry<Long, Map<Date, Set<Date>>> entryApartments : bookingsSession.entrySet()) {
+                long apartmentId = entryApartments.getKey();
+                List<Date> bookingDates = new ArrayList<>();
+                Map<Date, Set<Date>> monthBooked = entryApartments.getValue();
+                for (Map.Entry<Date, Set<Date>> entryMonths : monthBooked.entrySet()) {
+                    Set<Date> daysBooked = entryMonths.getValue();
+                    bookingDates.addAll(daysBooked);
+                }
+                ChartApartment apartment = new ChartApartment(appService.findOneApartment(apartmentId), bookingDates);
+                apartments.add(apartment);
+            }
+            model.addAttribute("apartments", apartments);
+        }
+        return "chart";
+    }
+    @RequestMapping(value = "/chart_clear")
+    public String clearChart(HttpSession session,
+                             Model model) {
+        Map<Long,Map<Date,Set<Date>>> bookingsSession = (TreeMap<Long,Map<Date,Set<Date>>>)session.getAttribute("bookingsSession");
+        bookingsSession.clear();
+        session.setAttribute("bookingsSession",bookingsSession);
+        model.addAttribute("chartQuantity",0);
+        model.addAttribute("message", "Chart cleared!");
+        return "forward:/";
+    }
+    @RequestMapping(value = "/chart_delete", method = RequestMethod.POST)
+    public String deleteChart(@RequestParam Long apartmentId,
+//                              @RequestParam (required = false) Boolean forwarded,
+                              HttpServletRequest request,
+                              HttpSession session,
+                             Model model) {
+        Map<Long,Map<Date,Set<Date>>> bookingsSession = (TreeMap<Long,Map<Date,Set<Date>>>)session.getAttribute("bookingsSession");
+        if(bookingsSession==null)
+            return "forward:/";
+        bookingsSession.remove(apartmentId);
+        session.setAttribute("bookingsSession",bookingsSession);
+        model.addAttribute("chartQuantity",bookingsSession.size());
+        model.addAttribute("message", "Chart changed!");
+        Boolean forwarded = (Boolean)request.getAttribute("forwarded");
+        if(forwarded!=null && forwarded) {
+            return "redirect:/";
+        }
+        return "forward:/chart";
+    }
+
+
+
+
+    @RequestMapping("/admin/districts_page")
     public String districtsPage(Model model) {
         model.addAttribute("districts", appService.listDistricts());
         return "districts_page";
     }
 
-    @RequestMapping(value = "/district/add", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/district/add", method = RequestMethod.POST)
     public String districtAdd(@RequestParam String name, Model model) {
         appService.addDistrict(new District(name));
         model.addAttribute("districts", appService.listDistricts());
@@ -99,7 +322,7 @@ public class AppController {
         return "districts_page";
     }
 
-    @RequestMapping(value = "/district_edit", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/district_edit", method = RequestMethod.POST)
     public String districtEdit(@RequestParam(value = "districtId") long districtId,
                               @RequestParam(name = "districtName") String districtName,
                               Model model) {
@@ -108,27 +331,27 @@ public class AppController {
         appService.editDistrict(district);
         model.addAttribute("districts", appService.listDistricts());
         model.addAttribute("message", "District changed");
-        return "forward:/districts_page";
+        return "forward:/admin/districts_page";
     }
 
-    @RequestMapping(value = "/district_delete", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/district_delete", method = RequestMethod.POST)
     public String districtDelete(@RequestParam long districtId,
                               Model model) {
 
         appService.deleteDistrict(appService.getDistrict(districtId));
         model.addAttribute("districts", appService.listDistricts());
         model.addAttribute("message", "District deleted");
-        return "forward:/districts_page";
+        return "forward:/admin/districts_page";
     }
 
-    @RequestMapping("/apartments_page")
+    @RequestMapping("/admin/apartments_page")
     public String apartmentsPage(Model model) {
         model.addAttribute("districts", appService.listDistricts());
         model.addAttribute("apartments", appService.listApartments());
         return "apartments_page";
     }
 
-    @RequestMapping("/apartments_page/{id}")
+    @RequestMapping("/admin/apartments_page/{id}")
     public String apartmentsPageistrict (@PathVariable(value = "id") long districtId
             , Model model) {
         District district = appService.findDistrict(districtId);
@@ -136,13 +359,13 @@ public class AppController {
         model.addAttribute("apartments", appService.listApartments(district));
         return "apartments_page";
     }
-    @RequestMapping("/add_apartment")
+    @RequestMapping("/admin/add_apartment")
     public String addApartment(Model model) {
         model.addAttribute("districts", appService.listDistricts());
         return "add_apartment";
     }
 
-    @RequestMapping(value = "/apartment/add", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/apartment/add", method = RequestMethod.POST)
     public String apartmentAdd(@RequestParam(value = "districtId") long districtId,
                                @RequestParam String street,
                                @RequestParam String building,
@@ -164,14 +387,14 @@ public class AppController {
         return "apartments_page";
     }
 
-    @RequestMapping(value = "/apartment_edit", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/apartment_edit", method = RequestMethod.POST)
     public String apartmentEdit(@RequestParam long apartmentId,
                                  Model model) {
         model.addAttribute("apartment", appService.findOneApartment(apartmentId));
         model.addAttribute("districts", appService.listDistricts());
         return "apartment_edit_page";
     }
-    @RequestMapping(value = "/apartment/post_edit", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/apartment/post_edit", method = RequestMethod.POST)
     public String apartmentPostEdit(@RequestParam long districtId,
                                     @RequestParam long apartmentId,
                                @RequestParam String street,
@@ -218,7 +441,7 @@ public class AppController {
         model.addAttribute("apartments", appService.listApartments());
         return "apartments_page";
     }
-    @RequestMapping(value = "/apartment_delete", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/apartment_delete", method = RequestMethod.POST)
     public String apartmentDelete(@RequestParam long apartmentId,
                                  Model model) throws IOException {
         Apartment apartment = appService.getOneApartment(apartmentId);
@@ -227,10 +450,10 @@ public class AppController {
         appService.deleteApartment(apartment);
         model.addAttribute("districts", appService.listDistricts());
         model.addAttribute("message", "Apartment deleted");
-        return "forward:/apartments_page";
+        return "forward:/admin/apartments_page";
     }
 
-    @RequestMapping("/calendar_upload_page")
+    @RequestMapping("/admin/calendar_upload_page")
     public String calendarUploadPage(Model model) {
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         int[] years = new int[]{currentYear, currentYear + 1};
@@ -239,7 +462,7 @@ public class AppController {
         return "calendar_upload_page";
     }
 
-    @RequestMapping(value = "/calendar_template_upload_page", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/calendar_template_upload_page", method = RequestMethod.POST)
     public String calendarCheck(@RequestParam int year,
                                 @RequestParam int month,
                                 Model model) throws ParseException {
@@ -249,7 +472,7 @@ public class AppController {
         cal.setTime(date);
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
 
-        List<Day> days = appService.listDays(date);
+        List<Day> days = appService.listMonthDays(date);
         model.addAttribute("year", year);
         model.addAttribute("monthString", months.get(month));
         model.addAttribute("month", month);
@@ -258,7 +481,7 @@ public class AppController {
         return "calendar_template_upload_page";
     }
 
-    @RequestMapping(value = "/calendar_upload", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/calendar_upload", method = RequestMethod.POST)
     public String calendarAdd(@RequestParam(required = false) Integer weekends,
                               @RequestParam(required = false) Integer[] holidays,
                               @RequestParam int month,
@@ -307,14 +530,14 @@ public class AppController {
         return "redirect:/calendar_upload_page";
     }
 
-    @RequestMapping("/pricing_upload_page")
+    @RequestMapping("/admin/pricing_upload_page")
     public String pricingUploadPage(Model model) {
         model.addAttribute("districts", appService.listDistricts());
         model.addAttribute("apartments", appService.listApartments());
         return "pricing_upload_page";
     }
 
-    @RequestMapping("/pricing_upload_page/{id}")
+    @RequestMapping("/admin/pricing_upload_page/{id}")
     public String pricingUploadPageDistrict(@PathVariable(value = "id") long districtId
             , Model model) {
         District district = appService.findDistrict(districtId);
@@ -323,29 +546,30 @@ public class AppController {
         return "pricing_upload_page";
     }
 
-    @RequestMapping(value = "/pricing_upload", method = RequestMethod.POST)
-    public String priceUpload(@RequestParam(value = "aptartmentId") long apartmentId,
+    @RequestMapping(value = "/admin/pricing_upload", method = RequestMethod.POST)
+    public String priceUpload(@RequestParam long apartmentId,
                               Model model) {
         Apartment apartment = appService.findOneApartment(apartmentId);
         List<Price> prices = apartment.getPrices();
 
 
         model.addAttribute("apartment", apartment);
-        model.addAttribute("pricesActual", Utility.getPricesByRevelance(prices, "actual"));
-        model.addAttribute("pricesArchive", Utility.getPricesByRevelance(prices,"archive"));
+        model.addAttribute("pricesActual", utility.getPricesByRevelance(prices, "actual"));
+        model.addAttribute("pricesArchive", utility.getPricesByRevelance(prices,"archive"));
 
         return "apartment_pricing_upload_page";
     }
 
-    @RequestMapping(value = "apartment_pricing_upload", method = RequestMethod.POST)
-    public String apartmentPriceUpload(@RequestParam(required = false) Double[] types,
+    @RequestMapping(value = "/admin/apartment_pricing_upload", method = RequestMethod.POST)
+    public String apartmentPriceUpload(@RequestParam(name = "pricesByTypes", required = false) Double[] pricesByTypes,
                               @RequestParam(name = "dateFrom",required = false) String dateFromStr,
                               @RequestParam(name = "dateTo",required = false) String dateToStr,
-                              @RequestParam(required = false) Long aptId,
+                              @RequestParam(required = false) Long apartmentId,
+                              Principal principal,
                               Model model) {
-
+        String registrator = principal.getName();
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-        Apartment apartment = appService.findOneApartment(aptId);
+        Apartment apartment = appService.findOneApartment(apartmentId);
         List<Price> prices = apartment.getPrices();
         try {
             Date dateFrom = sdf.parse(dateFromStr);
@@ -354,11 +578,11 @@ public class AppController {
                 dateTo = sdf.parse(dateToStr);
             }
             Date dateReg = new Date();
-            Date todayStart = Utility.getStartOfToday();
+            Date todayStart = utility.getStartOfToday();
             Date now = new Date();
             if (dateFrom.before(todayStart)) {
                 model.addAttribute("message", "Wrong \"Date from\" input! We can't change past ((( Try again...");
-                return "forward:/pricing_upload";
+                return "forward:/admin/pricing_upload";
             }
             if (dateFrom.compareTo(todayStart) == 0) {
                 dateFrom = dateReg;
@@ -366,17 +590,17 @@ public class AppController {
 
             mainCycle:
             for (int i = 0; i < 3; i++) {
-                if (types[i] != null) {
-                    List<Price> pricesByType = Utility.getPricesByRevelanceAndType(prices,"actual", i + 1);
+                if (pricesByTypes[i] != null) {
+                    List<Price> pricesByType = utility.getPricesByRevelanceAndType(prices,"actual", i + 1);
                     if (pricesByType.size() == 0) {
-                        Price newPrice = new Price(apartment, i + 1, types[i], dateFrom, dateTo, dateReg, "Admin");
+                        Price newPrice = new Price(apartment, i + 1, pricesByTypes[i], dateFrom, dateTo, dateReg, registrator);
                         appService.addPrice(newPrice);
 
                     } else {
                         Iterator<Price> iter = pricesByType.iterator();
                         while (iter.hasNext()) {
                             Price p = iter.next();
-                            if (dateFrom.compareTo(p.getDate_from())==0 && types[i] == p.getPrice()) {
+                            if (dateFrom.compareTo(p.getDate_from())==0 && pricesByTypes[i] == p.getPrice()) {
                                 if(dateTo==null&&p.getDate_to()==null) {
                                     continue mainCycle;
                                 }
@@ -388,12 +612,12 @@ public class AppController {
                             }
                             if (dateFrom.getTime() <= p.getDate_from().getTime()) {
                                 if (dateTo == null) {
-                                    p.setArchive(now, "Admin");
+                                    p.setArchive(now, registrator);
                                     appService.editPrice(p);
                                     continue;
                                 }
                                 if (dateTo.getTime() >= p.getDate_from().getTime()) {
-                                    p.setArchive(now, "Admin");
+                                    p.setArchive(now, registrator);
                                     appService.editPrice(p);
                                     if (p.getDate_to() == null) {
                                         Price newPrice = new Price(apartment, i + 1, p.getPrice(), dateTo, null, p.getDate_reg(), p.getRegistratorReg());
@@ -410,7 +634,7 @@ public class AppController {
                             }
                             if (dateFrom.getTime() >= p.getDate_from().getTime()) {
                                 if (p.getDate_to() == null) {
-                                    p.setArchive(now, "Admin");
+                                    p.setArchive(now, registrator);
                                     appService.editPrice(p);
                                     if (dateTo == null) {
                                         Price newPrice = new Price(apartment, i + 1, p.getPrice(), p.getDate_from(), dateFrom, p.getDate_reg(), p.getRegistratorReg());
@@ -428,7 +652,7 @@ public class AppController {
                                     continue;
                                 }
                                 if (dateFrom.getTime() <= p.getDate_to().getTime()) {
-                                    p.setArchive(now, "Admin");
+                                    p.setArchive(now, registrator);
                                     appService.editPrice(p);
                                     Price newPrice = new Price(apartment, i + 1, p.getPrice(), p.getDate_from(), dateFrom, p.getDate_reg(), p.getRegistratorReg());
                                     appService.addPrice(newPrice);
@@ -442,7 +666,7 @@ public class AppController {
                             }
 
                         }
-                        Price newPrice = new Price(apartment, i + 1, types[i], dateFrom, dateTo, dateReg, "Admin");
+                        Price newPrice = new Price(apartment, i + 1, pricesByTypes[i], dateFrom, dateTo, dateReg, registrator);
                         appService.addPrice(newPrice);
                     }
 
@@ -450,17 +674,19 @@ public class AppController {
             }
 
             model.addAttribute("message", "Pricing saved!");
-            return "forward:/pricing_upload";
+            return "forward:/admin/pricing_upload";
         } catch (ParseException e) {
             model.addAttribute("message", "Wrong \"Date from\" format input! Try again...");
-            return "forward:/pricing_upload";
+            return "forward:/admin/pricing_upload";
         }
     }
 
-    @RequestMapping(value = "/price_edit", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/price_edit", method = RequestMethod.POST)
     public String priceEdit(@RequestParam(value = "priceId") long priceId,
                               @RequestParam(name = "price") Double priceValue,
-                              Model model) {
+                            Principal principal,
+                            Model model) {
+        String registartor = principal.getName();
         Date today = Calendar.getInstance().getTime();
         Price price = appService.findOnePrice(priceId);
         Date dateFrom;
@@ -468,18 +694,20 @@ public class AppController {
             dateFrom = today;
         else
             dateFrom = price.getDate_from();
-        price.setArchive(today, "Admin");
+        price.setArchive(today, registartor);
         appService.editPrice(price);
 
-        Price newPrice = new Price(price.getApartment(), price.getType(), priceValue, dateFrom, price.getDate_to(), today, "Admin");
+        Price newPrice = new Price(price.getApartment(), price.getType(), priceValue, dateFrom, price.getDate_to(), today, registartor);
         appService.addPrice(newPrice);
         model.addAttribute("message", "Price changed");
-        return "forward:/pricing_upload";
+        return "forward:/admin/pricing_upload";
     }
-    @RequestMapping(value = "/price_delete", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/price_delete", method = RequestMethod.POST)
     public String priceDelete(@RequestParam long priceId,
 //                              @RequestParam(value = "toDelete[]") long [] pricesId,
+                              Principal principal,
                               Model model) {
+        String registrator = principal.getName();
         Date today = Calendar.getInstance().getTime();
 //        for (long id:pricesId) {
 //            Price price = appService.findOnePrice(id);
@@ -487,16 +715,18 @@ public class AppController {
 //            appService.editPrice(price);
 //        }
         Price price = appService.findOnePrice(priceId);
-        price.setArchive(today, "Admin");
+        price.setArchive(today, registrator);
         appService.editPrice(price);
         model.addAttribute("message", "Price deleted");
-        return "forward:/pricing_upload";
+        return "forward:/admin/pricing_upload";
     }
     @RequestMapping("/photo/{apartmentId}/{filename:.+}")
     public ResponseEntity<byte[]> onPhoto(@PathVariable("apartmentId") String apartmentId,
                                           @PathVariable("filename") String filename) throws IOException {
         return photoById(apartmentId, filename);
     }
+
+
     private ResponseEntity<byte[]> photoById(String apartmentId, String filename) throws IOException {
 
         File photo = new File(photosRootDirectory +"/"+apartmentId+"/"+filename);
@@ -531,6 +761,23 @@ public class AppController {
         }
         return false;
     }
+    private String getErrorMessage(HttpServletRequest request, String key) {
 
+        Exception exception = (Exception) request.getSession().getAttribute(key);
+
+        String error = "";
+        if (exception instanceof BadCredentialsException) {
+            error = "Invalid username/password!";
+        } else if (exception instanceof LockedException) {
+            error = exception.getMessage();
+        } else {
+            error = "Invalid username/password!";
+        }
+
+        return error;
+    }
 }
+
+
+
 

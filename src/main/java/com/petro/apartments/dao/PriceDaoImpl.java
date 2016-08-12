@@ -51,17 +51,17 @@ public class PriceDaoImpl implements PriceDao{
     }
 //    @Override
 //    public List<Price> listActual(Apartment apartment) {
-//        List<Price> list = list(apartment);
-//        if(list.size()==0){
-//            return list;
+//        List<Price> listMonth = listMonth(apartment);
+//        if(listMonth.size()==0){
+//            return listMonth;
 //        }
-//        Iterator<Price> iter = list.iterator();
+//        Iterator<Price> iter = listMonth.iterator();
 //        while(iter.hasNext()){
 //            Price p = iter.next();
 //            if(p.getDate_to().getTime() < Calendar.getInstance().getTime().getTime()){
 //                iter.remove();
 //            }
 //        }
-//        return list;
+//        return listMonth;
 //    }
 }

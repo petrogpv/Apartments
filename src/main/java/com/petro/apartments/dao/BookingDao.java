@@ -16,7 +16,7 @@ public interface BookingDao {
     List<Booking> list (Apartment apartment);
     List<Booking> list (Day day);
     List<Booking> list (Apartment apartment, Date dateFrom, Date dateTo);
-    List<Booking> list (Apartment apartment, Date monthDate);
+    List<Booking> listMonth(Apartment apartment, Date monthDate);
     List<Booking> findMany(long [] ids);
     Booking findOne(long id);
 

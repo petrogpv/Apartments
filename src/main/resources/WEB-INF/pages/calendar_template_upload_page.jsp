@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -106,6 +107,10 @@
 </head>
 <body onload="onload()">
 <div class="container">
+
+    <h3>Calendar upload</h3>
+    <jsp:include page="/WEB-INF/pages/navbar.jsp" />
+
 <c:choose>
         <c:when test="${check ne 0}">
             <h3>
@@ -116,7 +121,7 @@
         <c:otherwise>
             <h3>Pricing template upload for ${monthString} ${year}</h3>
 
-            <form action="/calendar_upload" method="post">
+            <form action="/admin/calendar_upload" method="post">
                 <h5>Default pricing model - all days in month will be priced by Type 1 prices. Choose options below to edit pricing model.</h5>
                 <input type="checkbox" name="weekends" value="1">Weekends pricing by Type 2 prices<Br>
                 <p>Choose holidays pricing by Type 3 or leave blank:</p>

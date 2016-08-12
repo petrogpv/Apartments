@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -30,8 +31,12 @@
 </head>
 <body>
 <div class="container">
-    <form role="form" enctype="multipart/form-data" class="form-horizontal" action="/apartment/add" method="post">
-        <h3>New apartment</h3>
+
+    <h3>New apartment</h3>
+    <jsp:include page="/WEB-INF/pages/navbar.jsp" />
+
+    <form role="form" enctype="multipart/form-data" class="form-horizontal" action="/admin/apartment/add" method="post">
+
         <select class="selectpicker form-control form-group" required name="districtId">
             <option value="" disabled selected hidden>select district</option>
             <c:forEach items="${districts}" var="district">

@@ -49,13 +49,15 @@ public class BookingDaoImpl implements BookingDao {
     }
 
     @Override
-    public List<Booking> list(Apartment apartment, Date monthDate) {
+    public List<Booking> listMonth(Apartment apartment, Date monthDate) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(monthDate);
+        cal.set(Calendar.DAY_OF_MONTH,1);
+        Date dateFrom = cal.getTime();
         int maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
         cal.set(Calendar.DAY_OF_MONTH,maxDay);
         Date dateTo = cal.getTime();
-        return list(apartment,monthDate,dateTo);
+        return list(apartment,dateFrom,dateTo);
     }
 
     @Override

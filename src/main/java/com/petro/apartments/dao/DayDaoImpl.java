@@ -1,7 +1,8 @@
 package com.petro.apartments.dao;
 
-import com.petro.apartments.entity.Booking;
+import com.petro.apartments.common.Utility;
 import com.petro.apartments.entity.Day;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -13,6 +14,9 @@ import java.util.List;
 
 @Repository
 public class DayDaoImpl implements DayDao {
+
+    @Autowired
+    Utility utility;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -30,22 +34,25 @@ public class DayDaoImpl implements DayDao {
     }
 
     @Override
-    public List<Day> list(Date monthDate) {
+    public List<Day> listMonth(Date monthDate) {
         Calendar cal = Calendar.getInstance();
+        Date dateFrom;
         Date dateTo;
 
-        if (monthDate!=null){
+//        if (monthDate!=null){
             cal.setTime(monthDate);
+            cal.set(Calendar.DAY_OF_MONTH,1);
+            dateFrom = utility.getStartOfDay(cal.getTime());
             int maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
             cal.set(Calendar.DAY_OF_MONTH,maxDay);
             dateTo = cal.getTime();
-        }
-        else {
-            cal.set(Calendar.DAY_OF_MONTH, 1);
-            monthDate = cal.getTime();
-            dateTo = new Date(Integer.MAX_VALUE);
-        }
-        return list(monthDate,dateTo);
+//        }
+//        else {
+//            cal.set(Calendar.DAY_OF_MONTH, 1);
+//            monthDate = cal.getTime();
+//            dateTo = new Date(Integer.MAX_VALUE);
+//        }
+        return list(dateFrom,dateTo);
     }
 
     @Override

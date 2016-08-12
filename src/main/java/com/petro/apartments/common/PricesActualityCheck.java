@@ -14,6 +14,8 @@ import java.util.TimerTask;
 public class PricesActualityCheck extends TimerTask{
     @Autowired
     private AppService appService;
+    @Autowired
+    private Utility utility;
 
     Boolean timerStart = false;
 
@@ -21,7 +23,7 @@ public class PricesActualityCheck extends TimerTask{
     void start(){
         if(timerStart == false){
             run();
-            Date tomorrowStart  = new Date (Utility.getStartOfToday().getTime()+ 86400001);
+            Date tomorrowStart  = new Date (utility.getStartOfToday().getTime()+ 86400001);
             Timer timer = new Timer(true);
             timer.scheduleAtFixedRate(this,tomorrowStart,86400000);
             timerStart = true;
@@ -29,7 +31,7 @@ public class PricesActualityCheck extends TimerTask{
     }
     @Override
     public void run() {
-        Date today = Utility.getStartOfToday();
+        Date today = utility.getStartOfToday();
         List<Price> prices = appService.listPrices();
 
         if (prices.size() != 0) {

@@ -3,13 +3,15 @@ package com.petro.apartments.common;
 
 import com.petro.apartments.dao.*;
 import com.petro.apartments.entity.*;
+import com.petro.apartments.security.User;
+import com.petro.apartments.security.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import javax.persistence.Query;
+import java.util.*;
 
 @Service
 public class AppService {
@@ -30,6 +32,8 @@ public class AppService {
     private PriceDao priceDao;
     @Autowired
     private ImageDao imageDao;
+    @Autowired
+    private UserDao userDao;
 
 
     @Transactional
@@ -106,8 +110,8 @@ public class AppService {
         dayDao.add(day);
     }
     @Transactional
-    public List<Day> listDays (Date monthDate){
-        return dayDao.list(monthDate);
+    public List<Day> listMonthDays(Date monthDate){
+        return dayDao.listMonth(monthDate);
     }
     @Transactional
     public List<Day> listDays (Date dateFrom, Date dateTo){
@@ -170,6 +174,47 @@ public class AppService {
     @Transactional
     public Image getOneImage(long id) {
         return imageDao.getOne(id);
+    }
+
+    @Transactional
+    public List<Booking> listBookings(Order order) {
+        return bookingDao.list(order);
+    }
+
+    @Transactional
+    public List<Booking> listBookings(Apartment apartment) {
+        return bookingDao.list(apartment);
+    }
+
+    @Transactional
+    public List<Booking> listBookings(Day day) {
+        return bookingDao.list(day);
+    }
+
+    @Transactional
+    public List<Booking> listBookings(Apartment apartment, Date dateFrom, Date dateTo) {
+
+        return bookingDao.list(apartment,dateFrom,dateTo);
+    }
+
+    @Transactional
+    public List<Booking> listMonthBookings(Apartment apartment, Date monthDate) {
+        return bookingDao.listMonth(apartment,monthDate);
+    }
+
+    @Transactional
+    public List<Booking> findManyBookings(long[] ids) {
+        return bookingDao.findMany(ids);
+    }
+
+    @Transactional
+    public Booking findOneBooking(long id) {
+        return bookingDao.findOne(id);
+    }
+
+    @Transactional
+    public User findUserByUserName(String username) {
+        return userDao.findByUserName(username);
     }
 
 

@@ -43,7 +43,7 @@ public class Price implements Comparable<Price> {
     private Date date_reg;
 
     @NotNull
-    private String registatorReg;
+    private String registratorReg;
 
     @Temporal(value = TemporalType.TIMESTAMP)
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="MM-dd-yyyy HH:mm:ss")
@@ -57,14 +57,14 @@ public class Price implements Comparable<Price> {
     public Price() {
     }
 
-    public Price(Apartment apartment, int type, double price, Date date_from, Date date_to,Date date_reg, String registatorReg) {
+    public Price(Apartment apartment, int type, double price, Date date_from, Date date_to,Date date_reg, String registratorReg) {
         this.apartment = apartment;
         this.type = type;
         this.price = price;
         this.date_from = date_from;
         this.date_to = date_to;
         this.date_reg = date_reg;
-        this.registatorReg = registatorReg;
+        this.registratorReg = registratorReg;
         this.revelance = "actual";
     }
 
@@ -119,11 +119,11 @@ public class Price implements Comparable<Price> {
     }
 
     public String getRegistratorReg() {
-        return registatorReg;
+        return registratorReg;
     }
 
     public void setRegistratorReg(String registatorReg){
-        this.registatorReg = registatorReg;
+        this.registratorReg = registatorReg;
     }
 
     public Date getDate_to() {

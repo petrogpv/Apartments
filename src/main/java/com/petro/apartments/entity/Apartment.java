@@ -18,7 +18,7 @@ public class Apartment {
     @NotNull
     private District district;
 
-    @OneToMany(mappedBy="apartment", cascade=CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy="apartment", cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Booking> bookings = new ArrayList<Booking>();
 
     @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)

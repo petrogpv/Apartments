@@ -1,5 +1,6 @@
 package com.petro.apartments.common;
 
+import com.petro.apartments.security.SecurityConfig;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -14,6 +15,7 @@ public class WebInitializer implements WebApplicationInitializer {
     public void onStartup(ServletContext servletContext) throws ServletException {
         AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
         ctx.register(AppConfig.class);
+        ctx.register(SecurityConfig.class);
         ctx.setServletContext(servletContext);
         ctx.refresh();
 

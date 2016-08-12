@@ -2,6 +2,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <html>
 <head>
     <title>Pricing upload</title>
@@ -13,6 +14,9 @@
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <link rel="stylesheet" href="/resources/demos/style.css">
+
+    <link href="<c:url value="/css/bootstrap.css" />" rel="stylesheet">
+
     <script>
         $(function() {
             $( "#datepicker1" ).datepicker();
@@ -61,15 +65,11 @@
 </head>
 <body>
 
-
-        <h3>
-           ${message}
-        </h3>
-
-
-<form action="/pricing_upload" id="form" method="post">
+<%--<form action="/pricing_upload" id="form" method="post">--%>
 <div class="container">
+
     <h3>Pricing upload</h3>
+    <jsp:include page="/WEB-INF/pages/navbar.jsp" />
     <%--<nav class="navbar navbar-default">--%>
         <%--<div class="container-fluid">--%>
             <%--<!-- Collect the nav links, forms, and other content for toggling -->--%>
@@ -98,9 +98,9 @@
     <li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Districts <span class="caret"></span></a>
     <ul class="dropdown-menu">
-    <li><a href="/pricing_upload_page">All</a></li>
+    <li><a href="/admin/pricing_upload_page">All</a></li>
     <c:forEach items="${districts}" var="district">
-    <li><a href="/pricing_upload_page/${district.id}">${district.name}</a></li>
+    <li><a href="/admin/pricing_upload_page/${district.id}">${district.name}</a></li>
     </c:forEach>
     </ul>
     </li>
@@ -119,7 +119,7 @@
     <c:forEach items="${apartments}" var="apartment">
         <tr>
             <td>
-                <form action="/pricing_upload" id="form_${apartment.id}"  method="post">
+                <form action="/admin/pricing_upload" id="form_${apartment.id}"  method="post">
                     <input type="hidden" name="apartmentId" value=${apartment.id}>
                     <input type="submit" name="form_${apartment.id}" id = "${apartment.id}" class="btn btn-primary" value=">">
                 </form>
@@ -134,6 +134,6 @@
 
 </table>
 </div>
-</form>
+<%--</form>--%>
 </body>
 </html>

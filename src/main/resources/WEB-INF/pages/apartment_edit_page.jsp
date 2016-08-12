@@ -1,5 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -48,10 +49,12 @@
     </style>
 </head>
 <body>
-
 <div class="container">
-    <form role="form" enctype="multipart/form-data" class="form-horizontal" action="/apartment/post_edit" method="post">
-        <h3>Apartment edit</h3>
+
+    <h3>Apartment edit</h3>
+    <jsp:include page="/WEB-INF/pages/navbar.jsp" />
+
+    <form role="form" enctype="multipart/form-data" class="form-horizontal" action="/admin/apartment/post_edit" method="post">
         <h5 >District </h5>
         <select style="width: 200px" required name="districtId">
             <c:forEach items="${districts}" var="district">

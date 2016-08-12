@@ -2,12 +2,14 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <html>
 <head>
     <title>Apartment pricing upload</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link href="<c:url value="/css/msg.css" />" rel="stylesheet">
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
@@ -70,6 +72,13 @@
 <body>
 <div class="container">
 
+    <h3>Apartment pricing upload</h3>
+    <jsp:include page="/WEB-INF/pages/navbar.jsp" />
+
+    <c:if test="${not empty message}">
+        <div class="msg">${message}</div>
+    </c:if>
+
 <table class="table table-striped">
     <thead>
     <tr>
@@ -123,31 +132,27 @@
 
 </table>
 <div class="container">
-    <h3>Apartment pricing upload</h3>
     <nav class="navbar navbar-default">
         <div class="container-fluid">
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <form action="/apartment_pricing_upload" method="post">
+                <form action="/admin/apartment_pricing_upload" method="post">
                     <ul id="groupList" class="nav navbar-nav">
 
                         <li style="margin: 10px"><p>Date from: <input type="date"  size="6" name="dateFrom" required id="datepicker1"></p></li>
                         <li style="margin: 10px"><p>Date to: <input type="date"  size="6" name="dateTo" id="datepicker2"></p></li>
-                        <li style="margin: 10px"><input type="number"  step="any" id="type1" name="types" placeholder="type1"></li>
-                        <li style="margin: 10px"><input type="number" step="any" id="type2" name="types" placeholder="type2"></li>
-                        <li style="margin: 10px"><input type="number"   step="any" id="type3" name="types" placeholder="type3"></li>
+                        <li style="margin: 10px"><input type="number"  step="any" id="type1" name="pricesByTypes" placeholder="type1"></li>
+                        <li style="margin: 10px"><input type="number" step="any" id="type2" name="pricesByTypes" placeholder="type2"></li>
+                        <li style="margin: 10px"><input type="number"   step="any" id="type3" name="pricesByTypes" placeholder="type3"></li>
                         <li style="margin: 10px"><input type="submit" id="sub" class="btn btn-default navbar-btn" value="Save"></li>
-                        <input type="hidden" name="aptId" value=${apartment.id}>
+                        <input type="hidden" name="apartmentId" value=${apartment.id}>
                     </ul>
                 </form>
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
 </div>
-<div align="center"><h3>
-    ${message}
-</h3>
-</div>
+
 <h4>Actual prices</h4>
 <table class="table table-striped">
     <thead>
@@ -175,18 +180,18 @@
             </td>
             <td>${price.registratorReg}</td>
             <td>
-                <form action="/price_edit" id="form_${price.id}" method="post">
+                <form action="/admin/price_edit" id="form_${price.id}" method="post">
                     <input type="number" step="any" required id="edit_input_${price.id}" name="price">
                     <input type="hidden" name="priceId" value=${price.id}>
-                    <input type="hidden" name="aptId" value=${apartment.id}>
+                    <input type="hidden" name="apartmentId" value=${apartment.id}>
                     <input type="submit" name="form_${price.id}" id="edit_${price.id}" class="btn btn-primary"
                            value="Edit">
                 </form>
             </td>
             <td>
-                <form action="/price_delete" id="delete_form" method="post">
+                <form action="/admin/price_delete" id="delete_form" method="post">
                         <%--<input type="checkbox" name="toDelete[]" value="${price.id}" />--%>
-                    <input type="hidden" name="aptId" value=${apartment.id}>
+                    <input type="hidden" name="apartmentId" value=${apartment.id}>
                     <input type="hidden" name="priceId" value=${price.id}>
                     <input type="submit" onclick="return confirm('Are you sure?')" name="delete_form"
                            class="btn btn-primary" id="delete" value="Delete">

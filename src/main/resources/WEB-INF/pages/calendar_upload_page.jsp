@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -11,8 +12,11 @@
 
 <body>
 <div class="container">
-    <form action="/calendar_template_upload_page" method="post" >
+    <form action="/admin/calendar_template_upload_page" method="post" >
+
         <h3>New month</h3>
+        <jsp:include page="/WEB-INF/pages/navbar.jsp" />
+
         <select  name="month">
             <option value="" disabled selected hidden>select month</option>
             <c:forEach items="${months}" var="month">

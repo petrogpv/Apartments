@@ -3,6 +3,7 @@ package com.petro.apartments.dao;
 import com.petro.apartments.common.Utility;
 import com.petro.apartments.entity.Apartment;
 import com.petro.apartments.entity.District;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -13,6 +14,9 @@ import java.util.List;
 
 @Repository
 public class ApartmentDaoImpl implements ApartmentDao {
+
+    @Autowired
+    Utility utility;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -36,13 +40,13 @@ public class ApartmentDaoImpl implements ApartmentDao {
     public List<Apartment> list(District district) {
         Query query = entityManager.createQuery("SELECT a FROM Apartment a WHERE a.district = :district", Apartment.class);
         query.setParameter("district", district);
-        return Utility.getListApartmentsWithActualPrices((List<Apartment>)query.getResultList());
+        return utility.getListApartmentsWithActualPrices((List<Apartment>)query.getResultList());
     }
 
     @Override
     public List<Apartment> list() {
         Query query = entityManager.createQuery("SELECT a FROM Apartment a", Apartment.class);
-        return Utility.getListApartmentsWithActualPrices((List<Apartment>)query.getResultList());
+        return utility.getListApartmentsWithActualPrices((List<Apartment>)query.getResultList());
     }
 
     @Override
