@@ -133,7 +133,8 @@
             }
                     else {
                 var prices = JSON.parse("${prices}");
-                var bookings = JSON.parse("${bookings}");
+                var bookings = JSON.parse("${bookings}")
+
 
                 document.write("<tr> <th>Mon <th>Tue <th>Wed " +
                         "<th>Thu <th>Fri <th><span style='color: red'> Sat</span> " +
@@ -189,7 +190,7 @@
             document.write("</table>");
             document.write("<input type='submit' style='width: 220px; margin-top: 20px' name='sub' value='Discard changes'>");
             document.write("<br><input type='submit' style='width: 220px; margin-top: 20px' name='sub' value='Save and go to other apartment'>");
-            document.write("<br><input type='submit'  style='width: 220px; margin-top: 20px' name='sub' value='Save and go to chart'>");
+            document.write("<br><input type='submit'  style='width: 220px; margin-top: 20px' name='sub' value='Save and go to cart'>");
             document.write("</form>");
 
             document.writeln("</div>");

@@ -41,7 +41,7 @@ public class BookingDaoImpl implements BookingDao {
     @Override
     public List<Booking> list(Apartment apartment, Date dateFrom, Date dateTo) {
         Query query = entityManager.createQuery("SELECT DISTINCT b FROM Booking b INNER JOIN b.day d WHERE b.apartment = :apartment " +
-                "AND d.date >= :dateFrom AND d.date = :dateTo ORDER BY d.date ASC", Booking.class);
+                "AND d.id >= :dateFrom AND d.id = :dateTo ORDER BY d.id ASC", Booking.class);
         query.setParameter("apartment",apartment);
         query.setParameter("dateFrom", dateFrom);
         query.setParameter("dateTo", dateTo);

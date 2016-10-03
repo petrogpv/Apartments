@@ -1946,6 +1946,10 @@ output {
           transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
 }
 
+.width30 {
+  width: 30%;
+}
+
 .form-control:focus {
   border-color: #66afe9;
   outline: 0;

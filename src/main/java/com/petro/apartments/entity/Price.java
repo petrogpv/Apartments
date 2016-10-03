@@ -16,7 +16,7 @@ public class Price implements Comparable<Price> {
     @GeneratedValue
     private long id;
 
-    @OneToMany(mappedBy="price", cascade=CascadeType.ALL)
+    @OneToMany(mappedBy="price", cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Booking> bookings = new ArrayList<Booking>();
 
     @ManyToOne(cascade=CascadeType.DETACH, fetch = FetchType.LAZY)

@@ -8,10 +8,10 @@ import java.util.List;
 
 @Entity
 @Table(name="Apartments")
-public class Apartment {
+public class Apartment implements Comparable<Apartment>{
     @Id
     @GeneratedValue
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name="district_id")
@@ -48,7 +48,7 @@ public class Apartment {
         this.longtitude = longtitude;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -125,5 +125,10 @@ public class Apartment {
 
     public void setImages(List<Image> images) {
         this.images = images;
+    }
+
+    @Override
+    public int compareTo(Apartment apartment) {
+        return this.getId().compareTo(apartment.getId());
     }
 }

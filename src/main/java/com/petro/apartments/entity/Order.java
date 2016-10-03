@@ -39,8 +39,6 @@ public class Order {
     private  String finalPrice;
     @Column(name = "payment_type")
     @NotNull
-    private  String paymentType;
-    @NotNull
     private String registartor;
 
     public Order(Date order_date, List<Booking> bookings,
@@ -52,7 +50,6 @@ public class Order {
         this.price = price;
         this.discount = discount;
         this.finalPrice = finalPrice;
-        this.paymentType = paymentType;
         this.registartor = registartor;
     }
 
@@ -103,14 +100,6 @@ public class Order {
 
     public void setFinalPrice(String finalPrice) {
         this.finalPrice = finalPrice;
-    }
-
-    public String getPaymentType() {
-        return paymentType;
-    }
-
-    public void setPaymentType(String paymentType) {
-        this.paymentType = paymentType;
     }
 
     public String getRegistartor() {

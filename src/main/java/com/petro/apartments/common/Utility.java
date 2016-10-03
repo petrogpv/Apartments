@@ -125,59 +125,61 @@ public  Map<String,List<Price>> separatePrices (List<Price> prices){
     }
 
 
-    public double [] daysWhithPrices (Apartment apartment, Date monthDate){
+    public Price [] daysWhithPrices (Apartment apartment, Date monthDate){
         Calendar cal = Calendar.getInstance();
         cal.setTime(monthDate);
 
-        double daysPrices [] = new double[cal.getActualMaximum(Calendar.DAY_OF_MONTH)+1];
+        Price daysPrices [] = new Price[cal.getActualMaximum(Calendar.DAY_OF_MONTH)+1];
 
 
         List <Price> prices = appService.listPrices(apartment);
         List <Day> days = appService.listMonthDays(cal.getTime());
         List <Booking> bookings = appService.listMonthBookings(apartment, cal.getTime());
 
-        for (Booking booking:bookings) {
-            cal.setTime(booking.getDay().getDate());
-            daysPrices [cal.get(Calendar.DAY_OF_MONTH)] = -1;
-        }
+
 
         Day day;
         int priceType;
         Date dayDate;
 
         for (int i = 1; i<daysPrices.length; i++){
-            if(daysPrices[i]==-1)
-                continue;
+//            if(daysPrices[i]== null)
+//                continue;
 
             day = days.get(i-1);
             priceType = day.getPriceType();
-            dayDate = day.getDate();
+            dayDate = day.getId();
 
             for (int j=priceType; j>=1; j--){
                 daysPrices[i] = getPriceByType(prices,j,dayDate);
-                if(daysPrices[i]!=0)
+                if(daysPrices[i]!=null)                             // ????
                     break;
             }
 
 
         }
 
+        for (Booking booking:bookings) {
+            cal.setTime(booking.getDay().getId());
+            daysPrices [cal.get(Calendar.DAY_OF_MONTH)] = null;
+        }
+
         return daysPrices;
     }
-    private double getPriceByType (List<Price> prices, int priceType, Date dayDate){
-        double price=0;
+    private Price getPriceByType (List<Price> prices, int priceType, Date dayDate){
+        Price price = null;
         for (Price p:prices) {
             if(p.getType()==priceType && p.getRevelance().equals("actual")){
                 Date dateFrom = p.getDate_from();
                 Date dateTo=p.getDate_to();
                 if(dateTo==null){
                     if(dateFrom.getTime()<=dayDate.getTime()||(dateFrom.getTime()-dayDate.getTime()<ONE_DAY)){
-                        price = p.getPrice();
+                        price = p;
                     }
                 }
                 else {
                     if((dateFrom.getTime()-dayDate.getTime()<ONE_DAY)&& dayDate.getTime()<= dateTo.getTime()){
-                        price = p.getPrice();
+                        price = p;
                     }
                 }
             }

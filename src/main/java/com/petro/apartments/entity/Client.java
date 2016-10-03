@@ -20,14 +20,16 @@ public class Client {
     @NotNull
     private String firstName;
     @Column(name = "last_name")
+    @NotNull
     private String lastNamae;
+    @NotNull
     private String address;
     @Column(name = "e_mail")
     private String eMail;
     @Column(name = "phone_number")
-    private String phoneNumber;
     @NotNull
-    private int discount;
+    private String phoneNumber;
+    private Integer discount;
 
     public Client() {
     }
@@ -81,11 +83,11 @@ public class Client {
         this.phoneNumber = phoneNumber;
     }
 
-    public int getDiscount() {
+    public Integer getDiscount() {
         return discount;
     }
 
-    public void setDiscount(int discount) {
+    public void setDiscount(Integer discount) {
         this.discount = discount;
     }
 }

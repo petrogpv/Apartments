@@ -2,6 +2,7 @@ package com.petro.apartments.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sun.istack.internal.NotNull;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -14,16 +15,12 @@ import java.util.List;
 public class Day {
 
     @Id
-    private int id;
+    private Date id;
 
     @Column (name = "day_of_week")
     @NotNull
     private int dayOfWeek;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="MM-dd-yyyy")
-    @NotNull
-    private Date date;
 
     @Column (name = "price_type")
     @NotNull
@@ -37,31 +34,23 @@ public class Day {
     }
 
     public Day(Date date, int priceType) {
-        this.date = date;
         this.priceType = priceType;
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        this.id = Integer.parseInt(""+cal.get(Calendar.YEAR)+(cal.get(Calendar.MONTH)+1)+cal.get(Calendar.DAY_OF_MONTH));
+        this.id = date;
         this.dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
 
     }
 
-    public int getId() {
+    public Date getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Date id) {
         this.id = id;
     }
 
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
 
     public int getDayOfWeek() {
         return dayOfWeek;

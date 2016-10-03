@@ -21,8 +21,6 @@ public class AppService {
     @Autowired
     private BookingDao bookingDao;
     @Autowired
-    private ClientDao clientDao;
-    @Autowired
     private DayDao dayDao;
     @Autowired
     private DistrictDao districtDao;
@@ -34,6 +32,8 @@ public class AppService {
     private ImageDao imageDao;
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private ClientDao clientDao;
 
 
     @Transactional
@@ -217,6 +217,30 @@ public class AppService {
         return userDao.findByUserName(username);
     }
 
+    @Transactional
+    public void addClient(Client client) {
+        clientDao.add(client);
+    }
+
+    @Transactional
+    public void deleteClient(Client client) {
+        clientDao.delete(client);
+    }
+
+    @Transactional
+    public List<Client> listClients() {
+        return clientDao.list();
+    }
+
+    @Transactional
+    public List<Client> listClients(String pattern) {
+        return clientDao.list(pattern);
+    }
+
+    @Transactional
+    public Client findOneClient(long id) {
+        return clientDao.findOne(id);
+    }
 
 //    @Transactional
 //    public List<Price> listActualPrices (Apartment apartment) {

@@ -135,7 +135,7 @@
                 <br>
                 <p><input type="submit" class="btn btn-primary" value="Confirm"></p>
             </form>
-            <input type="submit" class="btn btn-primary" value="Back" onclick="window.location='/calendar_upload_page';" />
+            <input type="submit" class="btn btn-primary" value="Back" onclick="window.location='/admin/calendar_upload_page';" />
         </c:otherwise>
     </c:choose>
 </div>

@@ -30,7 +30,7 @@ import java.util.*;
 @Controller
 @RequestMapping("/")
 @Scope("session")
-@SessionAttributes({"chartApartments","chartQuantity"})
+@SessionAttributes({"cartApartmentsSet"})
 public class AppController {
 
     private static Map<Integer, String> months = new HashMap<Integer, String>() {{
@@ -60,8 +60,8 @@ public class AppController {
                         Model model) throws ParseException {
         model.addAttribute("apartments", appService.listApartments());
 
-        if(session.getAttribute("chartQuantity")==null)
-            session.setAttribute("chartQuantity",0);
+        if(session.getAttribute("cartQuantity")==null)
+            session.setAttribute("cartQuantity",0);
 
         model.addAttribute("districts", appService.listDistricts());
         model.addAttribute("apartments", appService.listApartments());
@@ -115,19 +115,32 @@ public class AppController {
                             Model model) {
         if(submit !=null && submit.equals("Discard changes")){
             request.setAttribute("forwarded",true);
-            return "forward:/chart_delete";
+            return "forward:/cart_delete";
         }
-        Map<Long,Map<Date,Set<Date>>> bookingsSession = (TreeMap<Long,Map<Date,Set<Date>>>) session.getAttribute("bookingsSession");
 
-        if(bookingsSession==null) {
-            bookingsSession = new TreeMap<>();
+        Set<CartApartment> cartApartmentsSet = (TreeSet<CartApartment>)session.getAttribute("cartApartmentsSet");
+        Apartment apartment = appService.findOneApartment(apartmentId);
+        CartApartment cartApartment = null;
+        if(cartApartmentsSet==null) {
+            cartApartmentsSet = new TreeSet<>();
+            cartApartment = new CartApartment(apartment);
+        }
+        else{
+            for (CartApartment cha: cartApartmentsSet) {
+                if(cha.getId()==apartmentId){
+                    cartApartment = cha;
+                    break;
+                }
+            }
+
+            if(cartApartment==null)
+                cartApartment = new CartApartment(apartment);
         }
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(utility.getStartOfDay(cal.getTime()));
 
         Calendar calToday = (Calendar) cal.clone();
-        Apartment apartment = appService.findOneApartment(apartmentId);
 
         int today = 0;
         int backward = 1;
@@ -135,6 +148,7 @@ public class AppController {
         int month;
 
         if(dateMillis==null){
+            System.out.println("APTID" + apartmentId );
             month = calToday.get(Calendar.MONTH);
             today = calToday.get(Calendar.DAY_OF_MONTH);
 
@@ -149,46 +163,46 @@ public class AppController {
             Calendar calToBook  = (Calendar)cal.clone();
             Calendar calMonthDays = (Calendar)cal.clone();
 
-            Map<Date,Set<Date>> mapMonthDays = bookingsSession.get(apartmentId);
-
+            Map<Date, Set<DayPrice>> monthDaysMap = cartApartment.getMonthDaysMap();
 
             if(bookings!=null) {
-                if(mapMonthDays==null)
-                    mapMonthDays = new TreeMap<>();
 
+                Price [] daysPrices = utility.daysWhithPrices(apartment,cal.getTime());
 
-                Set<Date> datesToBook = new TreeSet<>();
+                if(monthDaysMap==null)
+                    monthDaysMap = new TreeMap<>();
+
+                Set<DayPrice> daysToBookMap = new TreeSet<>();
                 for (int i = 0; i < bookings.length; i++) {
                     calToBook.set(Calendar.DAY_OF_MONTH, bookings[i]);
-                    datesToBook.add(calToBook.getTime());
+                    daysToBookMap.add(new DayPrice(calToBook.getTime(),daysPrices[bookings[i]]));
                 }
-                mapMonthDays.put(calMonthDays.getTime(),datesToBook);
-                bookingsSession.put(apartmentId,mapMonthDays);
+                monthDaysMap.put(calMonthDays.getTime(),daysToBookMap);
+                cartApartment.setMonthDaysMap(monthDaysMap);
+                cartApartmentsSet.add(cartApartment);
             }
             else{
-                if(mapMonthDays!=null) {
-                    if (mapMonthDays.get(calMonthDays.getTime()) != null) {
-                        mapMonthDays.remove(calMonthDays.getTime());
-                        if (mapMonthDays.size() == 0) {
-                            bookingsSession.remove(apartmentId);
-                        }
+                if(monthDaysMap!=null) {
+                    if (monthDaysMap.get(calMonthDays.getTime()) != null) {
+                        monthDaysMap.remove(calMonthDays.getTime());
+                        if (monthDaysMap.size() == 0) {
 
+                            cartApartmentsSet.remove(cartApartment);
+
+                        }
                     }
                 }
             }
 
-            session.setAttribute("bookingsSession",bookingsSession);
-            model.addAttribute("chartQuantity",bookingsSession.size());
-            System.out.println("bookingsSession.size() :" + bookingsSession.size());
-            System.out.println("\"chartQuantity\") :" + session.getAttribute("chartQuantity"));
+            session.setAttribute("cartApartmentsSet",cartApartmentsSet);
 
             month = cal.get(Calendar.MONTH);
 
             if(submit!=null && submit.equals("Save and go to other apartment")){
                 return "redirect:/";
             }
-            if(submit!=null && submit.equals("Save and go to chart")){
-                return "redirect:/chart";
+            if(submit!=null && submit.equals("Save and go to cart")){
+                return "redirect:/cart";
             }
 
             if(submit!=null && submit.equals(">"))
@@ -210,26 +224,35 @@ public class AppController {
             forward = -1;
 
         if(appService.listMonthDays(cal.getTime()).size()!=0){
-            double [] daysPrices = utility.daysWhithPrices(apartment,cal.getTime());
+            Price [] daysPrices = utility.daysWhithPrices(apartment,cal.getTime());
 
             int [] book = new int[daysPrices.length];
             Calendar calBooks = (Calendar)cal.clone();
 
-            if(bookingsSession.size()!=0){
-                Map<Date,Set<Date>> monthBooked = bookingsSession.get(apartmentId);
-                if(monthBooked != null) {
-                    Set<Date> daysBooked = monthBooked.get(cal.getTime());
-                    if (daysBooked != null) {
-                        for (Date day : daysBooked) {
-                            calBooks.setTime(day);
+//            if(cartApartmentsSet.size()!=0){
+                Map<Date, Set<DayPrice>> monthDaysMap = cartApartment.getMonthDaysMap();
+                if(monthDaysMap != null) {
+                    Set<DayPrice> daysToBook = monthDaysMap.get(cal.getTime());
+                    if (daysToBook != null) {
+                        for (DayPrice dayPrice: daysToBook) {
+                            calBooks.setTime(dayPrice.getDay());
                             book[calBooks.get(Calendar.DAY_OF_MONTH)] = -1;
                         }
                     }
                 }
-            }
+//            }
 
             Gson gson = new Gson();
-            String prices = gson.toJson(daysPrices);
+
+            double [] daysPricesArray = new double[daysPrices.length];
+            for (int i = 1; i<daysPricesArray.length; i++) {
+                if(daysPrices[i] == null)
+                    daysPricesArray[i]= -1;
+                else
+                daysPricesArray[i] = daysPrices[i].getPrice();
+            }
+
+            String prices = gson.toJson(daysPricesArray);
             String books = gson.toJson(book);
 
             int maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -253,59 +276,44 @@ public class AppController {
         return "apartment_page";
     }
 
-    @RequestMapping(value = "/chart")
-    public String chart(HttpSession session,
-                        Model model) {
-        Map<Long,Map<Date,Set<Date>>> bookingsSession = (TreeMap<Long,Map<Date,Set<Date>>>) session.getAttribute("bookingsSession");
-        List <ChartApartment> apartments = new ArrayList<>();
-
-        if (bookingsSession!=null) {
-            for (Map.Entry<Long, Map<Date, Set<Date>>> entryApartments : bookingsSession.entrySet()) {
-                long apartmentId = entryApartments.getKey();
-                List<Date> bookingDates = new ArrayList<>();
-                Map<Date, Set<Date>> monthBooked = entryApartments.getValue();
-                for (Map.Entry<Date, Set<Date>> entryMonths : monthBooked.entrySet()) {
-                    Set<Date> daysBooked = entryMonths.getValue();
-                    bookingDates.addAll(daysBooked);
-                }
-                ChartApartment apartment = new ChartApartment(appService.findOneApartment(apartmentId), bookingDates);
-                apartments.add(apartment);
-            }
-            model.addAttribute("apartments", apartments);
-        }
-        return "chart";
+    @RequestMapping(value = "/cart")
+    public String cart() {
+        return "cart";
     }
-    @RequestMapping(value = "/chart_clear")
-    public String clearChart(HttpSession session,
+    @RequestMapping(value = "/cart_clear")
+    public String clearCart(HttpSession session,
                              Model model) {
-        Map<Long,Map<Date,Set<Date>>> bookingsSession = (TreeMap<Long,Map<Date,Set<Date>>>)session.getAttribute("bookingsSession");
-        bookingsSession.clear();
-        session.setAttribute("bookingsSession",bookingsSession);
-        model.addAttribute("chartQuantity",0);
-        model.addAttribute("message", "Chart cleared!");
+        Set<CartApartment> cartApartmentsSet = (TreeSet<CartApartment>)session.getAttribute("cartApartmentsSet");
+        cartApartmentsSet.clear();
+        session.setAttribute("cartApartmentsSet", cartApartmentsSet);
+        model.addAttribute("message", "Cart cleared!");
         return "forward:/";
     }
-    @RequestMapping(value = "/chart_delete", method = RequestMethod.POST)
-    public String deleteChart(@RequestParam Long apartmentId,
+    @RequestMapping(value = "/cart_delete", method = RequestMethod.POST)
+    public String deleteCart(@RequestParam Long apartmentId,
 //                              @RequestParam (required = false) Boolean forwarded,
                               HttpServletRequest request,
                               HttpSession session,
                              Model model) {
-        Map<Long,Map<Date,Set<Date>>> bookingsSession = (TreeMap<Long,Map<Date,Set<Date>>>)session.getAttribute("bookingsSession");
-        if(bookingsSession==null)
+        Set<CartApartment> cartApartmentsSet = (TreeSet<CartApartment>)session.getAttribute("cartApartmentsSet");
+        if(cartApartmentsSet==null)
             return "forward:/";
-        bookingsSession.remove(apartmentId);
-        session.setAttribute("bookingsSession",bookingsSession);
-        model.addAttribute("chartQuantity",bookingsSession.size());
-        model.addAttribute("message", "Chart changed!");
+        CartApartment cartApartment = null;
+        for (CartApartment cha: cartApartmentsSet) {
+            if(cha.getId()==apartmentId){
+                cartApartment = cha;
+                break;
+            }
+        }
+        cartApartmentsSet.remove(cartApartment);
+        session.setAttribute("cartApartmentsSet",cartApartmentsSet);
+        model.addAttribute("message", "Cart changed!");
         Boolean forwarded = (Boolean)request.getAttribute("forwarded");
         if(forwarded!=null && forwarded) {
             return "redirect:/";
         }
-        return "forward:/chart";
+        return "forward:/cart";
     }
-
-
 
 
     @RequestMapping("/admin/districts_page")
@@ -527,7 +535,7 @@ public class AppController {
             cal.set(Calendar.DAY_OF_MONTH, d);
             appService.addDay(new Day(cal.getTime(), 1));
         }
-        return "redirect:/calendar_upload_page";
+        return "redirect:/admin/calendar_upload_page";
     }
 
     @RequestMapping("/admin/pricing_upload_page")
@@ -724,6 +732,24 @@ public class AppController {
     public ResponseEntity<byte[]> onPhoto(@PathVariable("apartmentId") String apartmentId,
                                           @PathVariable("filename") String filename) throws IOException {
         return photoById(apartmentId, filename);
+    }
+
+    @RequestMapping("/new_order")
+    public String newOrder(
+                           @RequestParam String firstName,
+                           @RequestParam String lastName,
+                           @RequestParam String address,
+                           @RequestParam String eMail,
+                           @RequestParam String phoneNumber,
+                           @RequestParam (required = false) Integer discount,
+                           HttpSession session){
+
+        Client client = new Client(firstName,lastName,address,eMail,phoneNumber,discount!=null?discount:0);
+        appService.addClient(client);
+        Set<CartApartment> cartApartments = (TreeSet<CartApartment>)session.getAttribute("cartApartmentsSet");
+
+
+        return "index";
     }
 
 

@@ -4,7 +4,8 @@
 <html>
 <head>
     <title>New Apartment</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <%--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">--%>
+    <link href="<c:url value="/css/bootstrap.css" />" rel="stylesheet">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     <%--<script>--%>
         <%--$(document).ready(function () {--%>
@@ -37,15 +38,15 @@
 
     <form role="form" enctype="multipart/form-data" class="form-horizontal" action="/admin/apartment/add" method="post">
 
-        <select class="selectpicker form-control form-group" required name="districtId">
+        <select class="selectpicker form-control form-group width30" required name="districtId">
             <option value="" disabled selected hidden>select district</option>
             <c:forEach items="${districts}" var="district">
                 <option  value="${district.id}">${district.name}</option>
             </c:forEach>
         </select>
-        <input class="form-control form-group" type="text" id="street"  name="street" required placeholder="street">
-        <input class="form-control form-group" type="text" id="building" name="building" required placeholder="building">
-        <input class="form-control form-group" type="text" id="aptNumber" name="aptNumber" placeholder="aptNumber">
+        <input class="form-control form-group  width30" type="text" id="street"  name="street" required placeholder="street">
+        <input class="form-control form-group width30" type="text" id="building" name="building" required placeholder="building">
+        <input class="form-control form-group width30" type="text" id="aptNumber" name="aptNumber" placeholder="aptNumber">
         Upload photos: <input type="file" name="photos" multiple><br>
         <input type="submit" class="btn btn-primary" id="sub" value="Add">
 

@@ -57,7 +57,7 @@ public class DayDaoImpl implements DayDao {
 
     @Override
     public List<Day> list(Date dateFrom, Date dateTo) {
-        Query query = entityManager.createQuery("SELECT d FROM Day d WHERE d.date >= :dateFrom AND d.date <= :dateTo ORDER BY d.date ASC", Day.class);
+        Query query = entityManager.createQuery("SELECT d FROM Day d WHERE d.id >= :dateFrom AND d.id <= :dateTo ORDER BY d.id ASC", Day.class);
         query.setParameter("dateFrom", dateFrom);
         query.setParameter("dateTo", dateTo);
         return (List<Day>)query.getResultList();
