@@ -10,8 +10,8 @@ import java.util.Date;
 import java.util.List;
 
 public interface BookingDao {
-//    void add(Booking booking);
-//    void delete(Booking booking);
+    void add(Booking booking);
+    void delete(Booking booking);
     List<Booking> list (Order order);
     List<Booking> list (Apartment apartment);
     List<Booking> list (Day day);

@@ -12,7 +12,7 @@
 <%--<body>--%>
 
 <div style="margin-bottom: 10px; ">
-    <a href="/" class="btn btn-sm btn-default" style="margin-right: 10px;" role = button >Home</a>
+    <%--<a href="/" class="btn btn-sm btn-default" style="margin-right: 10px;" role = button >Home</a>--%>
     <a href="/" style="margin-right: 10px; ">Home</a>
     <div  style=" float: right" >
         <a href="<c:url value="/cart" />" style="margin-right: 20px">Cart(${fn:length(cartApartmentsSet)})</a>

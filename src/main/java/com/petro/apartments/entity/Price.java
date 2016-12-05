@@ -1,7 +1,7 @@
 package com.petro.apartments.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.sun.istack.internal.NotNull;
+//import com.sun.istack.internal.NotNull;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -13,24 +13,24 @@ import java.util.List;
 public class Price implements Comparable<Price> {
 
     @Id
-    @GeneratedValue
-    private long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-    @OneToMany(mappedBy="price", cascade=CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy="price", cascade={CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     private List<Booking> bookings = new ArrayList<Booking>();
 
-    @ManyToOne(cascade=CascadeType.DETACH, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST,CascadeType.REFRESH})
     Apartment apartment;
 
-    @NotNull
+//    @NotNull
     private int type;
-    @NotNull
+//    @NotNull
     private double price;
 
 
     @Temporal(value = TemporalType.TIMESTAMP)
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="MM-dd-yyyy HH:mm:ss")
-    @NotNull
+//    @NotNull
     private Date date_from;
 
     @Temporal(value = TemporalType.TIMESTAMP)
@@ -39,10 +39,10 @@ public class Price implements Comparable<Price> {
 
     @Temporal(value = TemporalType.TIMESTAMP)
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="MM-dd-yyyy HH:mm:ss")
-    @NotNull
+//    @NotNull
     private Date date_reg;
 
-    @NotNull
+//    @NotNull
     private String registratorReg;
 
     @Temporal(value = TemporalType.TIMESTAMP)
@@ -50,7 +50,7 @@ public class Price implements Comparable<Price> {
     private Date date_exp;
     private String registratorExp;
 
-    @NotNull
+//    @NotNull
     private String revelance;
 
 
@@ -69,13 +69,13 @@ public class Price implements Comparable<Price> {
     }
 
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
+//    public void setId(long id) {
+//        this.id = id;
+//    }
 
     public List<Booking> getBookings() {
 

@@ -33,13 +33,16 @@ public class ClientDaoImpl implements ClientDao {
 
     @Override
     public List<Client> list(String pattern) {
-        Query query = entityManager.createQuery("SELECT c FROM Client c WHERE c.firstName OR c.lastName  LIKE :pattern", Client.class);
+        Query query = entityManager.createQuery("SELECT c FROM Client c WHERE c.firstName   LIKE :pattern OR c.lastName LIKE :pattern", Client.class);
         query.setParameter("pattern", "%" + pattern + "%");
         return (List<Client>) query.getResultList();
     }
 
     @Override
     public Client findOne(long id) {
+        return entityManager.find(Client.class,id);
+    }
+    public Client getOne(long id) {
         return entityManager.getReference(Client.class,id);
     }
 }

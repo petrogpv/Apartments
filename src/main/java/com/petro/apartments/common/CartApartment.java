@@ -28,6 +28,7 @@ public class CartApartment extends Apartment {
         return monthDaysMap;
     }
 
+
     public void setMonthDaysMap(Map<Date, Set<DayPrice>> monthDaysMap) {
         this.monthDaysMap = monthDaysMap;
         setTotalPrice();
@@ -47,8 +48,4 @@ public class CartApartment extends Apartment {
 
     }
 
-    @Override
-    public int hashCode() {
-        return this.getId().intValue();
-    }
 }

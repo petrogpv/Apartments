@@ -3,8 +3,11 @@ package com.petro.apartments.dao;
 
 import com.petro.apartments.entity.Booking;
 import com.petro.apartments.entity.Client;
+import com.petro.apartments.entity.District;
 import com.petro.apartments.entity.Order;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -25,15 +28,32 @@ public class OrderDaoImpl implements OrderDao {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void delete(Order order) {
         entityManager.remove(order);
 
     }
 
     @Override
+    public Order findOne (Long id) {
+        return entityManager.find(Order.class, id);
+    }
+
+    @Override
+    public Order getOne(Long id) {
+        return entityManager.getReference(Order.class,id);
+    }
+
+    @Override
     public List<Order> list(Client client) {
         Query query = entityManager.createQuery("SELECT o FROM Order o WHERE o.client = :client", Order.class);
         query.setParameter("client", client);
+        return (List<Order>)query.getResultList();
+    }
+
+    @Override
+    public List<Order> list() {
+        Query query = entityManager.createQuery("SELECT o FROM Order o", Order.class);
         return (List<Order>)query.getResultList();
     }
 

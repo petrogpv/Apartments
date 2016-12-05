@@ -72,9 +72,9 @@
         <select style="display: none"  multiple="multiple" class="image-picker" name="toDelete" >
         <c:forEach items="${apartment.images}" var="image">
             <option data-img-src="/photo/${apartment.id}/${image.filename}"  value="${image.id}"></option>
-
         </c:forEach>
         </select>
+
         </div>
         </c:if>
 

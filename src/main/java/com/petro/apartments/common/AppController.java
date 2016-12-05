@@ -11,7 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.session.Session;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,17 +68,18 @@ public class AppController {
         model.addAttribute("districts", appService.listDistricts());
         model.addAttribute("apartments", appService.listApartments());
 
-        SimpleDateFormat sdf = new SimpleDateFormat("MM-yyyy");
-        Date date = sdf.parse("3-2016");
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-        model.addAttribute("date", cal.getTime().getTime());
+//        SimpleDateFormat sdf = new SimpleDateFormat("MM-yyyy");
+//        Date date = sdf.parse("3-2016");
+//        Calendar cal = Calendar.getInstance();
+//        cal.setTime(date);
+//        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+//        model.addAttribute("date", cal.getTime().getTime());
         return "index";
     }
     @RequestMapping(value = "/login" , method = RequestMethod.GET)
     public String loginPage(@RequestParam(value = "error", required = false) String error,
-                            @RequestParam(value = "logout", required = false) String logout, HttpServletRequest request,
+                            @RequestParam(value = "logout", required = false) String logout,
+                            HttpServletRequest request,
                             Model model){
 
         if (error != null) {
@@ -109,17 +112,41 @@ public class AppController {
     public String apartment(@RequestParam(value = "apartmentId") long apartmentId,
                             @RequestParam(required = false, value = "date") Long dateMillis,
                             @RequestParam(required = false, value = "sub") String submit,
-                            @RequestParam(required = false, value = "bookings") Integer [] bookings,
+                            @RequestParam(required = false, value = "bookings") List <Integer> bookings,
                             HttpServletRequest request,
                             HttpSession session,
                             Model model) {
+
         if(submit !=null && submit.equals("Discard changes")){
             request.setAttribute("forwarded",true);
             return "forward:/cart_delete";
         }
 
-        Set<CartApartment> cartApartmentsSet = (TreeSet<CartApartment>)session.getAttribute("cartApartmentsSet");
         Apartment apartment = appService.findOneApartment(apartmentId);
+
+        if(submit == null){
+            Calendar calTo = Calendar.getInstance();
+            if(dateMillis != null){
+                calTo.setTime(new Date(dateMillis));
+            }
+            else {
+                calTo.set(Calendar.DAY_OF_MONTH, calTo.getActualMaximum(Calendar.DAY_OF_MONTH));
+            }
+            Calendar calFrom = (Calendar)calTo.clone();
+            calFrom.set(Calendar.DAY_OF_MONTH,1);
+            List <Booking> bookingList =  appService.listBookings(apartment, calFrom.getTime(),calTo.getTime());
+            if(bookings==null)
+                bookings = new ArrayList<>();
+            for (Booking b: bookingList) {
+                Day day = b.getDay();
+                calTo.setTime(day.getId());
+                bookings.add(calTo.get(Calendar.DAY_OF_MONTH));
+            }
+
+        }
+
+        Set<CartApartment> cartApartmentsSet = (TreeSet<CartApartment>)session.getAttribute("cartApartmentsSet");
+
         CartApartment cartApartment = null;
         if(cartApartmentsSet==null) {
             cartApartmentsSet = new TreeSet<>();
@@ -136,7 +163,6 @@ public class AppController {
             if(cartApartment==null)
                 cartApartment = new CartApartment(apartment);
         }
-
         Calendar cal = Calendar.getInstance();
         cal.setTime(utility.getStartOfDay(cal.getTime()));
 
@@ -148,7 +174,6 @@ public class AppController {
         int month;
 
         if(dateMillis==null){
-            System.out.println("APTID" + apartmentId );
             month = calToday.get(Calendar.MONTH);
             today = calToday.get(Calendar.DAY_OF_MONTH);
 
@@ -173,9 +198,9 @@ public class AppController {
                     monthDaysMap = new TreeMap<>();
 
                 Set<DayPrice> daysToBookMap = new TreeSet<>();
-                for (int i = 0; i < bookings.length; i++) {
-                    calToBook.set(Calendar.DAY_OF_MONTH, bookings[i]);
-                    daysToBookMap.add(new DayPrice(calToBook.getTime(),daysPrices[bookings[i]]));
+                for (int i = 0; i < bookings.size(); i++) {
+                    calToBook.set(Calendar.DAY_OF_MONTH, bookings.get(i));
+                    daysToBookMap.add(new DayPrice(appService.findOneDay(calToBook.getTime()),daysPrices[bookings.get(i)]));
                 }
                 monthDaysMap.put(calMonthDays.getTime(),daysToBookMap);
                 cartApartment.setMonthDaysMap(monthDaysMap);
@@ -186,7 +211,6 @@ public class AppController {
                     if (monthDaysMap.get(calMonthDays.getTime()) != null) {
                         monthDaysMap.remove(calMonthDays.getTime());
                         if (monthDaysMap.size() == 0) {
-
                             cartApartmentsSet.remove(cartApartment);
 
                         }
@@ -235,7 +259,7 @@ public class AppController {
                     Set<DayPrice> daysToBook = monthDaysMap.get(cal.getTime());
                     if (daysToBook != null) {
                         for (DayPrice dayPrice: daysToBook) {
-                            calBooks.setTime(dayPrice.getDay());
+                            calBooks.setTime(dayPrice.getDay().getId());
                             book[calBooks.get(Calendar.DAY_OF_MONTH)] = -1;
                         }
                     }
@@ -315,6 +339,16 @@ public class AppController {
         return "forward:/cart";
     }
 
+    @RequestMapping (value = "/client_search")
+    public String clientSearch(@RequestParam(value = "pattern") String patternToFind,
+                               Model model){
+        List<Client> clients = appService.listClients(patternToFind);
+
+        model.addAttribute("found", clients.size());
+        model.addAttribute("clients", clients);
+        model.addAttribute("patternToFind",patternToFind);
+        return "forward:/cart";
+    }
 
     @RequestMapping("/admin/districts_page")
     public String districtsPage(Model model) {
@@ -437,14 +471,15 @@ public class AppController {
         if(toDelete!=null){
             changes = 1;
             for (long photoId:toDelete) {
-                        Image photo = appService.getOneImage(photoId);
-                        appService.deleteImage(photo);
+                Image photo = appService.getOneImage(photoId);
+//                apartment.removeImage(photo);
+                appService.deleteImage(photo);
                 File photoToDelete = new File(photosRootDirectory+"/"+apartment.getId(),photo.getFilename());
                 photoToDelete.delete();
             }
         }
-
-        model.addAttribute("message",(savePhotos(apartment,photos)||changes==1)?"Changes saved!":"There is no changes!");
+        boolean savePhotosCheck = savePhotos(apartment,photos);
+        model.addAttribute("message",(savePhotosCheck||changes==1)?"Changes saved!":"There is no changes!");
         model.addAttribute("districts", appService.listDistricts());
         model.addAttribute("apartments", appService.listApartments());
         return "apartments_page";
@@ -558,7 +593,7 @@ public class AppController {
     public String priceUpload(@RequestParam long apartmentId,
                               Model model) {
         Apartment apartment = appService.findOneApartment(apartmentId);
-        List<Price> prices = apartment.getPrices();
+        Set<Price> prices = apartment.getPrices();
 
 
         model.addAttribute("apartment", apartment);
@@ -578,7 +613,7 @@ public class AppController {
         String registrator = principal.getName();
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
         Apartment apartment = appService.findOneApartment(apartmentId);
-        List<Price> prices = apartment.getPrices();
+        Set<Price> prices = apartment.getPrices();
         try {
             Date dateFrom = sdf.parse(dateFromStr);
             Date dateTo = null;
@@ -734,25 +769,120 @@ public class AppController {
         return photoById(apartmentId, filename);
     }
 
-    @RequestMapping("/new_order")
-    public String newOrder(
-                           @RequestParam String firstName,
-                           @RequestParam String lastName,
-                           @RequestParam String address,
-                           @RequestParam String eMail,
-                           @RequestParam String phoneNumber,
-                           @RequestParam (required = false) Integer discount,
-                           HttpSession session){
 
+    @RequestMapping(value = "/client_select" , method = RequestMethod.POST)
+    public String clientSelect(@RequestParam Long clientId,
+            Model model){
+        model.addAttribute("client", appService.findOneClient(clientId));
+        return "/cart";
+    }
+    @RequestMapping(value = "/new_client" , method = RequestMethod.POST)
+    public String newClient(
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam String address,
+            @RequestParam String eMail,
+            @RequestParam String phoneNumber,
+            @RequestParam (required = false) Integer discount,
+            Model model){
         Client client = new Client(firstName,lastName,address,eMail,phoneNumber,discount!=null?discount:0);
         appService.addClient(client);
+        model.addAttribute("client", client);
+        return "/cart";
+    }
+    @Transactional
+    @RequestMapping(value = "/new_order" , method = RequestMethod.POST)
+    public String newOrder(@RequestParam Long clientId,
+                           Principal principal,
+                           HttpSession session,
+                           Model model){
+
+        Client client  = appService.getOneClient(clientId);
+        Order order = new Order(client, principal.getName());
         Set<CartApartment> cartApartments = (TreeSet<CartApartment>)session.getAttribute("cartApartmentsSet");
+        double totalPrice = 0;
+        for (CartApartment ca: cartApartments) {
+            totalPrice += ca.getTotalPrice();
+            order.setApartment(ca);
+            Map<Date, Set<DayPrice>> monthDaysMap = ca.getMonthDaysMap();
+            for (Map.Entry<Date, Set<DayPrice>> entry: monthDaysMap.entrySet()) {
+                Set<DayPrice> dayPrice = entry.getValue();
+                for (DayPrice dp: dayPrice) {
+                    Day day = dp.getDay();
+                    Price price = dp.getPrice();
+                    Booking booking = new Booking(ca,price,day);
+                    order.setBooking(booking);
+                }
+            }
+        }
 
+        order.setPrice(totalPrice);
+        appService.addOrder(order);
 
-        return "index";
+        cartApartments.clear();
+        session.setAttribute("cartApartmentsSet", cartApartments);
+        model.addAttribute("message", "Order saved");
+        return "forward:/";
     }
 
+    @RequestMapping(value = "/orders_page")
+    public String orders(Model model){
+        model.addAttribute("orders", appService.listOrders());
+        return "/orders_page";
+    }
+    @RequestMapping (value = "/orders_search")
+    public String ordersSearch(@RequestParam(value = "pattern") String patternToFind,
+                               Model model){
 
+
+        return "forward:/cart";
+    }
+    @RequestMapping (value = "/client_orders_search")
+    public String clientOrdersSearch(@RequestParam(value = "pattern") String patternToFind,
+                               Model model){
+        clientSearch(patternToFind,model);
+        return "/orders_page";
+    }
+    @RequestMapping(value = "/client_orders_select" , method = RequestMethod.POST)
+    public String cientOrdersSelect(@RequestParam Long clientId,
+                            Model model) {
+        Client client = appService.findOneClient(clientId);
+        List <Order> orders = appService.listOrders(client);
+        if (orders.size()==0){
+            model.addAttribute("error", "Orders not found for client  " + client.getFirstName() +" " + client.getLastName());
+        }
+        else {
+            model.addAttribute("message", "Orders for client  " + client.getFirstName() +" " + client.getLastName());
+            model.addAttribute("orders", appService.listOrders(client));
+        }
+        return "/orders_page";
+    }
+
+    @RequestMapping(value = "/order_edit", method = RequestMethod.POST)
+    public String orderEdit(@RequestParam long orderId,
+                                Model model) {
+        model.addAttribute("order", appService.findOneOrder(orderId));
+        return "order_edit_page";
+    }
+    @Transactional
+    @RequestMapping(value = "/order_delete", method = RequestMethod.POST)
+    public String orderDelete(@RequestParam long orderId,
+                              Model model) {
+        Order order = appService.getOneOrder(orderId);
+        Iterator<Booking> i = order.getBookings().iterator();
+        while(i.hasNext()){
+            Booking b = i.next();
+            order.removeBooking(b,i);
+            appService.deleteBooking(b);
+        }
+
+        order.removeApartments();
+        order.removeBookings();
+        appService.deleteOrder(order);
+//        model.addAttribute("order", appService.findOneOrder(orderId));
+
+        return "redirect:/";
+    }
     private ResponseEntity<byte[]> photoById(String apartmentId, String filename) throws IOException {
 
         File photo = new File(photosRootDirectory +"/"+apartmentId+"/"+filename);
@@ -770,13 +900,12 @@ public class AppController {
         long id = apartment.getId();
         File photosDirectory = new File(photosRootDirectory +"/"+id);
         photosDirectory.mkdirs();
-        if (photos.length != 1 && photos[0].getSize() != 0) {
+        if (photos[0].getSize() != 0) {
             for (MultipartFile ph : photos) {
                 long nameId = System.currentTimeMillis();
                 String fileExt = ph.getOriginalFilename().substring(ph.getOriginalFilename().lastIndexOf("."));
                 String filename = String.valueOf(nameId).concat(fileExt);
-                appService.addImage(new Image(nameId, filename, apartment));
-
+                appService.addImage( new  Image(nameId, filename, apartment));
                 File image = new File(photosDirectory, filename);
                 image.createNewFile();
                 FileOutputStream fos = new FileOutputStream(image);
@@ -786,6 +915,7 @@ public class AppController {
             return  true;
         }
         return false;
+
     }
     private String getErrorMessage(HttpServletRequest request, String key) {
 

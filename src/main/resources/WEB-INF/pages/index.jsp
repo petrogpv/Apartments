@@ -49,13 +49,13 @@
                         <ul id="groupList" class="nav navbar-nav">
 
                             <sec:authorize access="hasRole('ADMIN')">
+                                <li><button type="button" id="orders" class="btn btn-default navbar-btn">Orders</button></li>
                                 <li><button type="button" id="pricing_upload" class="btn btn-default navbar-btn">Pricing upload</button></li>
                                 <li><button type="button" id="calendar_upload" class="btn btn-default navbar-btn">Calendar upload</button></li>
                                 <li><button type="button" id="apartments" class="btn btn-default navbar-btn">Apartments</button></li>
                                 <li><button type="button" id="districts" class="btn btn-default navbar-btn">Districts</button></li>
                             </sec:authorize>
 
-                            <li><button type="button" id="delete_group" class="btn btn-default navbar-btn">Delete Group</button></li>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Districts <span class="caret"></span></a>
                                 <ul class="dropdown-menu">
@@ -66,12 +66,6 @@
                                 </ul>
                             </li>
                         </ul>
-                        <form class="navbar-form navbar-left" role="search" action="/search" method="post">
-                            <div class="form-group">
-                                <input type="text" class="form-control" name="pattern" placeholder="Search">
-                            </div>
-                            <button type="submit" class="btn btn-default">Submit</button>
-                        </form>
                     </div><!-- /.navbar-collapse -->
                 </div><!-- /.container-fluid -->
             </nav>
@@ -91,6 +85,7 @@
                         <td>
                             <form action="/apartment" id="form_${apartment.id}"  method="post">
                                 <input type="hidden" name="apartmentId" value=${apartment.id}>
+                                <%--<input type="hidden" name="date" value=${date}>--%>
                                 <input type="submit" name="form_${apartment.id}" id = "${apartment.id}" class="btn btn-primary" value=">">
                              </form>
                         </td>
@@ -106,6 +101,10 @@
 
         <script>
             $('.dropdown-toggle').dropdown();
+
+            $('#orders').click(function(){
+                window.location.href='/orders_page';
+            })
 
             $('#apartments').click(function(){
                 window.location.href='/admin/apartments_page';

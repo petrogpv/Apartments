@@ -30,7 +30,7 @@ public class Utility {
     }
 
     public Apartment getApartmentWithActualPrices (Apartment apartment){
-        List<Price> prices = apartment.getPrices();
+        Set<Price> prices = apartment.getPrices();
         if(prices.size()!=0) {
             Iterator<Price> iter = prices.iterator();
             long now = Calendar.getInstance().getTime().getTime();
@@ -103,7 +103,7 @@ public  Map<String,List<Price>> separatePrices (List<Price> prices){
     return map;
 
 }
-    public  List<Price> getPricesByRevelance(List<Price> prices, String revelance){
+    public  List<Price> getPricesByRevelance(Set<Price> prices, String revelance){
         List<Price> result= new ArrayList<>();
 
         result.addAll(getPricesByRevelanceAndType(prices,revelance,1));
@@ -114,7 +114,7 @@ public  Map<String,List<Price>> separatePrices (List<Price> prices){
 
     }
 
-    public List<Price> getPricesByRevelanceAndType(List<Price> prices, String revelance, int type){
+    public List<Price> getPricesByRevelanceAndType(Set<Price> prices, String revelance, int type){
         List<Price> pricesActual = new ArrayList<>();
         for (Price p :prices) {
             if(p.getType()==type && p.getRevelance().equals(revelance))

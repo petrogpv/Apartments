@@ -11,5 +11,6 @@ public interface DayDao {
     void add (Day day);
     List<Day> listMonth(Date monthDate);
     List<Day> list(Date dateFrom, Date dateTo);
-    Day findOne (String id);
+    Day findOne (Date id);
+    Day getOne (Date id);
 }

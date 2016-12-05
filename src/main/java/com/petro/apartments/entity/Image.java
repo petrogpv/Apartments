@@ -1,6 +1,6 @@
 package com.petro.apartments.entity;
 
-import com.sun.istack.internal.NotNull;
+//import com.sun.istack.internal.NotNull;
 
 import javax.persistence.*;
 
@@ -10,12 +10,13 @@ public class Image {
 
 
     @Id
-    private long id;
-    @NotNull
+    @Column(name = "id")
+    private Long id;
+//    @NotNull
     private String filename;
 
-    @ManyToOne
-//            (cascade=CascadeType.DETACH, fetch = FetchType.EAGER)
+    @ManyToOne( fetch = FetchType.EAGER)
+//    cascade={CascadeType.MERGE, CascadeType.REFRESH},
     @JoinColumn(name="apartrment_id")
     Apartment apartment;
 
@@ -23,11 +24,11 @@ public class Image {
     public Image(long id, String filename, Apartment apartment) {
         this.id = id;
         this.filename = filename;
-        this.apartment = apartment;
+        setApartment(apartment);
     }
     public Image() {}
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -36,12 +37,19 @@ public class Image {
     }
 
     public void setApartment(Apartment apartment) {
-        this.apartment = apartment;
+        setApartment(apartment, true);
     }
 
-    public void setId(long id) {
-        this.id = id;
+    void setApartment(Apartment apartment, boolean add) {
+        this.apartment = apartment;
+        if (apartment != null && add) {
+            apartment.addImage(this, false);
+        }
     }
+
+//    public void setId(Long id) {
+//        this.id = id;
+//    }
 
     public String getFilename() {
         return filename;
@@ -49,5 +57,22 @@ public class Image {
 
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+
+
+
+    public boolean equals(Object object) {
+        if (object == this)
+            return true;
+        if ((object == null) || !(object instanceof Image))
+            return false;
+
+        final Image a = (Image)object;
+
+        if (id != null && a.getId() != null) {
+            return id.equals(a.getId());
+        }
+        return false;
     }
 }

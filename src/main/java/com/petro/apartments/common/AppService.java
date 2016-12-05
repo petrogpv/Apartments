@@ -6,11 +6,10 @@ import com.petro.apartments.entity.*;
 import com.petro.apartments.security.User;
 import com.petro.apartments.security.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.Query;
 import java.util.*;
 
 @Service
@@ -96,7 +95,14 @@ public class AppService {
     @Transactional
     public List<District> listDistricts (){
         List<District> districts = districtDao.list();
-        districts.sort(Comparator.comparing(District::getName));
+//        districts.sort(Comparator.comparing(District::getName));
+//        districts.sort(new Comparator<District>() {
+//            @Override
+//            public int compare(District o1, District o2) {
+//                return o1.getName().compareTo(o2.getName());
+//            }
+//        });
+        districts.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
         return districts;
     }
 
@@ -118,7 +124,7 @@ public class AppService {
         return dayDao.list(dateFrom,dateTo);
     }
     @Transactional
-    public Day findOneDay (String id){
+    public Day findOneDay (Date id){
         return  dayDao.findOne(id);
     }
 
@@ -148,7 +154,7 @@ public class AppService {
     }
 
     @Transactional
-    public void delete(Price price) {
+    public void deletePrice(Price price) {
         priceDao.delete(price);
     }
 
@@ -174,6 +180,16 @@ public class AppService {
     @Transactional
     public Image getOneImage(long id) {
         return imageDao.getOne(id);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteBooking(Booking booking) {
+        bookingDao.delete(booking);
+    }
+
+    @Transactional
+    public void addBooking(Booking booking) {
+        bookingDao.add(booking);
     }
 
     @Transactional
@@ -240,6 +256,48 @@ public class AppService {
     @Transactional
     public Client findOneClient(long id) {
         return clientDao.findOne(id);
+    }
+    @Transactional
+    public Client getOneClient(long id) {
+        return clientDao.getOne(id);
+    }
+
+    @Transactional
+    public void addOrder(Order order) {
+        orderDao.add(order);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteOrder(Order order) {
+        orderDao.delete(order);
+
+    }
+    @Transactional
+    public List<Order> listOrders() {
+        return orderDao.list();
+    }
+    @Transactional
+    public List<Order> listOrders(Client client) {
+        return orderDao.list(client);
+    }
+
+    @Transactional
+    public List<Order> listOrders(Date monthDate) {
+        return orderDao.list(monthDate);
+    }
+
+    @Transactional
+    public List<Order> listOrders(Date dateFrom, Date dateTo) {
+        return orderDao.list(dateFrom, dateTo);
+    }
+
+    @Transactional
+    public Order findOneOrder (Long id) {
+        return orderDao.findOne(id);
+    }
+    @Transactional
+    public Order getOneOrder (Long id) {
+        return orderDao.getOne(id);
     }
 
 //    @Transactional

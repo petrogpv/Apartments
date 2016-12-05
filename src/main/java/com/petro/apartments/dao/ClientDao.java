@@ -11,5 +11,6 @@ public interface ClientDao {
     List<Client> list ();
     List<Client> list (String pattern);
     Client findOne(long id);
+    Client getOne(long id);
 
 }

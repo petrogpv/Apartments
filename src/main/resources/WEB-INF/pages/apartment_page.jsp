@@ -151,8 +151,10 @@
                         document.write(i + "<br>");
 //                    document.write("<span class='price'>"+prices[i]+"</span>");
                     } else {
-                        if (prices[i] == -1)
+                        if (prices[i] == -1){
                             document.write("<td style='background-color:#fd7672' >");
+                        }
+
                         else {
                             if (bookings[i] != -1) {
                                 if (i != thisDay)
@@ -172,7 +174,11 @@
                             }
                         }
                         document.write(i + "<br>");
+                        if (prices[i] != -1)
                         document.write("<span class='price'>" + prices[i] + "</span>");
+//                        else
+//                            document.write("<br>");
+
                     }
                     column++;
                     if (column == 7 && i != nDays) {
@@ -230,15 +236,15 @@
 <c:forEach items="${apartment.images}" var="image">
     <a target="_blank" style="padding: 5px" href=/photo/${apartment.id}/${image.filename}><img hight = "100" width="100" src="/photo/${apartment.id}/${image.filename}"></a>
 </c:forEach>
-
+    <h4 align="center"><b> Book:</b></h4>
     <script>
-        calendar();
+    calendar();
 
-        $(function()
-        {
-            onload();
-        });
-    </script>
+    $(function()
+    {
+        onload();
+    });
+</script>
 </div>
 
 </body>

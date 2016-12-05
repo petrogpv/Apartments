@@ -1,6 +1,6 @@
 package com.petro.apartments.entity;
 
-import com.sun.istack.internal.NotNull;
+//import com.sun.istack.internal.NotNull;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -9,34 +9,50 @@ import java.util.List;
 @Entity
 @Table(name="Clients")
 public class Client {
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
+    }
+
     @Id
     @GeneratedValue
-    private long id;
+    private Long id;
 
-    @OneToMany(mappedBy="client", cascade=CascadeType.ALL)
+    @OneToMany(mappedBy="client", fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     private List<Order> orders = new ArrayList<Order>();
 
     @Column(name = "first_name")
-    @NotNull
+//    @NotNull
     private String firstName;
     @Column(name = "last_name")
-    @NotNull
-    private String lastNamae;
-    @NotNull
+//    @NotNull
+    private String lastName;
+//    @NotNull
     private String address;
     @Column(name = "e_mail")
     private String eMail;
     @Column(name = "phone_number")
-    @NotNull
+//    @NotNull
     private String phoneNumber;
     private Integer discount;
 
     public Client() {
     }
 
-    public Client(String firstName, String lastNamae, String address, String eMail, String phoneNumber, int discount) {
+    public Client(String firstName, String lastName, String address, String eMail, String phoneNumber, int discount) {
         this.firstName = firstName;
-        this.lastNamae = lastNamae;
+        this.lastName = lastName;
         this.address = address;
         this.eMail = eMail;
         this.phoneNumber = phoneNumber;
@@ -51,12 +67,12 @@ public class Client {
         this.firstName = firstName;
     }
 
-    public String getLastNamae() {
-        return lastNamae;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLastNamae(String lastNamae) {
-        this.lastNamae = lastNamae;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getAddress() {

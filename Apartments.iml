@@ -73,5 +73,6 @@
     <orderEntry type="library" name="Maven: org.springframework.security:spring-security-config:4.1.1.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.security:spring-security-taglibs:4.1.1.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.security:spring-security-acl:4.1.1.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: javax.jdo:jdo:2.0-20050809.1515" level="project" />
   </component>
 </module>

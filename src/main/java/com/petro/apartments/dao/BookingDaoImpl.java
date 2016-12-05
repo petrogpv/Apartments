@@ -18,6 +18,16 @@ public class BookingDaoImpl implements BookingDao {
     EntityManager entityManager;
 
     @Override
+    public void add(Booking booking) {
+        entityManager.persist(booking);
+    }
+
+    @Override
+    public void delete(Booking booking) {
+        entityManager.remove(booking);
+    }
+
+    @Override
     public List<Booking> list(Order order) {
         Query query = entityManager.createQuery("SELECT b FROM Booking b WHERE b.order = :order", Booking.class);
         query.setParameter("order", order);
@@ -41,7 +51,7 @@ public class BookingDaoImpl implements BookingDao {
     @Override
     public List<Booking> list(Apartment apartment, Date dateFrom, Date dateTo) {
         Query query = entityManager.createQuery("SELECT DISTINCT b FROM Booking b INNER JOIN b.day d WHERE b.apartment = :apartment " +
-                "AND d.id >= :dateFrom AND d.id = :dateTo ORDER BY d.id ASC", Booking.class);
+                "AND d.id >= :dateFrom AND d.id <= :dateTo ORDER BY d.id ASC", Booking.class);
         query.setParameter("apartment",apartment);
         query.setParameter("dateFrom", dateFrom);
         query.setParameter("dateTo", dateTo);

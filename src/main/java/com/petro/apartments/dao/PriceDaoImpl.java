@@ -20,7 +20,7 @@ public class PriceDaoImpl implements PriceDao{
     @Override
     public void add(Price price) {
 
-        entityManager.persist(price);
+        entityManager.merge(price);
     }
 
     @Override

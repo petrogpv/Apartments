@@ -64,9 +64,12 @@ public class DayDaoImpl implements DayDao {
     }
 
     @Override
-    public Day findOne(String id) {
+    public Day findOne(Date id) {
+        return entityManager.find(Day.class,id);
+    }
+    @Override
+    public Day getOne(Date id) {
         return entityManager.getReference(Day.class,id);
     }
-
 
 }

@@ -1,7 +1,7 @@
 package com.petro.apartments.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.sun.istack.internal.NotNull;
+//import com.sun.istack.internal.NotNull;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -18,15 +18,15 @@ public class Day {
     private Date id;
 
     @Column (name = "day_of_week")
-    @NotNull
+//    @NotNull
     private int dayOfWeek;
 
 
     @Column (name = "price_type")
-    @NotNull
+//    @NotNull
     private int priceType;
 
-    @OneToMany(mappedBy="day", cascade=CascadeType.ALL)
+    @OneToMany(mappedBy="day", cascade=CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Booking> bookings = new ArrayList<Booking>();
 
 
