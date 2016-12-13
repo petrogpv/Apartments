@@ -17,7 +17,7 @@ public class ClientDaoImpl implements ClientDao {
 
     @Override
     public void add(Client client) {
-        entityManager.merge(client);
+        entityManager.persist(client);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package com.petro.apartments.entity;
 
-//import com.sun.istack.internal.NotNull;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,21 +7,7 @@ import java.util.List;
 @Entity
 @Table(name="Clients")
 public class Client {
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public List<Order> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
-    }
 
     @Id
     @GeneratedValue
@@ -33,18 +17,19 @@ public class Client {
     private List<Order> orders = new ArrayList<Order>();
 
     @Column(name = "first_name")
-//    @NotNull
     private String firstName;
+
     @Column(name = "last_name")
-//    @NotNull
     private String lastName;
-//    @NotNull
+
     private String address;
+
     @Column(name = "e_mail")
     private String eMail;
+
     @Column(name = "phone_number")
-//    @NotNull
     private String phoneNumber;
+
     private Integer discount;
 
     public Client() {
@@ -105,5 +90,20 @@ public class Client {
 
     public void setDiscount(Integer discount) {
         this.discount = discount;
+    }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
     }
 }

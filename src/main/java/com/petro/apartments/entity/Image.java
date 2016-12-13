@@ -1,7 +1,5 @@
 package com.petro.apartments.entity;
 
-//import com.sun.istack.internal.NotNull;
-
 import javax.persistence.*;
 
 @Entity
@@ -12,11 +10,9 @@ public class Image {
     @Id
     @Column(name = "id")
     private Long id;
-//    @NotNull
     private String filename;
 
     @ManyToOne( fetch = FetchType.EAGER)
-//    cascade={CascadeType.MERGE, CascadeType.REFRESH},
     @JoinColumn(name="apartrment_id")
     Apartment apartment;
 
@@ -47,9 +43,6 @@ public class Image {
         }
     }
 
-//    public void setId(Long id) {
-//        this.id = id;
-//    }
 
     public String getFilename() {
         return filename;
@@ -58,9 +51,6 @@ public class Image {
     public void setFilename(String filename) {
         this.filename = filename;
     }
-
-
-
 
     public boolean equals(Object object) {
         if (object == this)

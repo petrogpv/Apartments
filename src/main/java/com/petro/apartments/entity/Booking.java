@@ -1,6 +1,5 @@
 package com.petro.apartments.entity;
 
-//import com.sun.istack.internal.NotNull;
 
 import javax.persistence.*;
 
@@ -18,17 +17,14 @@ public class Booking implements Comparable<Booking>{
 
     @ManyToOne
     @JoinColumn(name="apt_id")
-//    @NotNull
     private Apartment apartment;
 
     @ManyToOne
     @JoinColumn(name="price_id")
-//    @NotNull
     private Price price;
 
     @ManyToOne
     @JoinColumn(name="day_id")
-//    @NotNull
     private Day day;
 
 
@@ -47,10 +43,6 @@ public class Booking implements Comparable<Booking>{
     public Long getId() {
         return id;
     }
-
-//    public void setId(long id) {
-//        this.id = id;
-//    }
 
     public Order getOrder() {
 
@@ -86,13 +78,14 @@ public class Booking implements Comparable<Booking>{
     }
     @Override
     public int hashCode() {
-        return this.getId().intValue()/100000;
+//        long hashLong = this.getId()/100000 ;
+//        long hashLong = (Long.parseLong("" + apartment.getId() + day.getId().getTime()))/10000;
+        int hashLong = day.getId().hashCode();
+        return hashLong;
     }
     @Override
     public int compareTo(Booking booking) {
-        Long thisId = this.getId();
-        Long notThis = booking.getId();
-        return this.getId().compareTo(booking.getId());
+        return this.day.getId().compareTo(booking.getDay().getId());
     }
 
     @Override
@@ -104,8 +97,8 @@ public class Booking implements Comparable<Booking>{
 
         final Booking b = (Booking) object;
 
-        if (id != null && b.getId() != null) {
-            return id.equals(b.getId());
+        if (day.getId() != null && b.getDay().getId() != null) {
+            return day.getId().equals(b.getDay().getId());
         }
         return false;
     }

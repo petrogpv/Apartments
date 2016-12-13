@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
-import org.springframework.session.Session;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -419,7 +418,7 @@ public class AppController {
         if(aptNumber==null){
             aptNumber=0;
         }
-        Apartment apartment = new Apartment(district, street, building, aptNumber, 0, 0);
+        Apartment apartment = new Apartment(district, street, building, aptNumber);
         appService.addApartment(apartment);
 
         savePhotos(apartment,photos);
@@ -597,8 +596,8 @@ public class AppController {
 
 
         model.addAttribute("apartment", apartment);
-        model.addAttribute("pricesActual", utility.getPricesByRevelance(prices, "actual"));
-        model.addAttribute("pricesArchive", utility.getPricesByRevelance(prices,"archive"));
+        model.addAttribute("pricesActual", utility.getPricesByRelevance(prices, "actual"));
+        model.addAttribute("pricesArchive", utility.getPricesByRelevance(prices,"archive"));
 
         return "apartment_pricing_upload_page";
     }
@@ -634,7 +633,7 @@ public class AppController {
             mainCycle:
             for (int i = 0; i < 3; i++) {
                 if (pricesByTypes[i] != null) {
-                    List<Price> pricesByType = utility.getPricesByRevelanceAndType(prices,"actual", i + 1);
+                    List<Price> pricesByType = utility.getPricesByRelevanceAndType(prices,"actual", i + 1);
                     if (pricesByType.size() == 0) {
                         Price newPrice = new Price(apartment, i + 1, pricesByTypes[i], dateFrom, dateTo, dateReg, registrator);
                         appService.addPrice(newPrice);
@@ -869,15 +868,17 @@ public class AppController {
     public String orderDelete(@RequestParam long orderId,
                               Model model) {
         Order order = appService.getOneOrder(orderId);
-        Iterator<Booking> i = order.getBookings().iterator();
-        while(i.hasNext()){
-            Booking b = i.next();
-            order.removeBooking(b,i);
-            appService.deleteBooking(b);
-        }
+//        Iterator<Booking> i = order.getBookings().iterator();
+//        while(i.hasNext()){
+//            Booking b = i.next();
+//            System.out.println("HASH: "+b.hashCode());
+////            order.removeBooking(b,i);
+//            appService.deleteBooking(b);
+//        }
 
-        order.removeApartments();
         order.removeBookings();
+        order.removeApartments();
+
         appService.deleteOrder(order);
 //        model.addAttribute("order", appService.findOneOrder(orderId));
 

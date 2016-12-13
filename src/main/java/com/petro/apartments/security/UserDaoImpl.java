@@ -17,7 +17,6 @@ public class UserDaoImpl implements UserDao {
     @PersistenceContext
     EntityManager entityManager;
 
-    //    @SuppressWarnings("unchecked")
     @Override
     public User findByUserName(String username) {
         Query query = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :pattern", User.class);

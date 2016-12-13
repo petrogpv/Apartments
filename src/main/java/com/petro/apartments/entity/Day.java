@@ -1,9 +1,5 @@
 package com.petro.apartments.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-//import com.sun.istack.internal.NotNull;
-import org.hibernate.annotations.Type;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -18,12 +14,10 @@ public class Day {
     private Date id;
 
     @Column (name = "day_of_week")
-//    @NotNull
     private int dayOfWeek;
 
 
     @Column (name = "price_type")
-//    @NotNull
     private int priceType;
 
     @OneToMany(mappedBy="day", cascade=CascadeType.ALL, fetch = FetchType.EAGER)

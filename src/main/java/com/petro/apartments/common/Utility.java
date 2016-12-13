@@ -35,7 +35,7 @@ public class Utility {
             Iterator<Price> iter = prices.iterator();
             long now = Calendar.getInstance().getTime().getTime();
             while (iter.hasNext()) {
-                if(iter.next().getRevelance().equals("Archive")) {
+                if(iter.next().getRelevance().equals("Archive")) {
                     iter.remove();
                     continue;
                 }
@@ -67,19 +67,19 @@ public  Map<String,List<Price>> separatePrices (List<Price> prices){
     for (Price p :prices) {
         switch (p.getType()){
             case 1:
-                if(p.getRevelance()=="actual")
+                if(p.getRelevance()=="actual")
                     pricesActualType1.add(p);
                 else
                     pricesOldType1.add(p);
                 break;
             case 2:
-                if(p.getRevelance()=="actual")
+                if(p.getRelevance()=="actual")
                     pricesActualType2.add(p);
                 else
                     pricesOldType2.add(p);
                 break;
             case 3:
-                if(p.getRevelance()=="actual")
+                if(p.getRelevance()=="actual")
                     pricesActualType3.add(p);
                 else
                     pricesOldType3.add(p);
@@ -103,21 +103,21 @@ public  Map<String,List<Price>> separatePrices (List<Price> prices){
     return map;
 
 }
-    public  List<Price> getPricesByRevelance(Set<Price> prices, String revelance){
+    public  List<Price> getPricesByRelevance(Set<Price> prices, String relevance){
         List<Price> result= new ArrayList<>();
 
-        result.addAll(getPricesByRevelanceAndType(prices,revelance,1));
-        result.addAll(getPricesByRevelanceAndType(prices,revelance,2));
-        result.addAll(getPricesByRevelanceAndType(prices,revelance,3));
+        result.addAll(getPricesByRelevanceAndType(prices, relevance,1));
+        result.addAll(getPricesByRelevanceAndType(prices, relevance,2));
+        result.addAll(getPricesByRelevanceAndType(prices, relevance,3));
 
         return result;
 
     }
 
-    public List<Price> getPricesByRevelanceAndType(Set<Price> prices, String revelance, int type){
+    public List<Price> getPricesByRelevanceAndType(Set<Price> prices, String relevance, int type){
         List<Price> pricesActual = new ArrayList<>();
         for (Price p :prices) {
-            if(p.getType()==type && p.getRevelance().equals(revelance))
+            if(p.getType()==type && p.getRelevance().equals(relevance))
                 pricesActual.add(p);
         }
         Collections.sort(pricesActual,Collections.reverseOrder());
@@ -169,7 +169,7 @@ public  Map<String,List<Price>> separatePrices (List<Price> prices){
     private Price getPriceByType (List<Price> prices, int priceType, Date dayDate){
         Price price = null;
         for (Price p:prices) {
-            if(p.getType()==priceType && p.getRevelance().equals("actual")){
+            if(p.getType()==priceType && p.getRelevance().equals("actual")){
                 Date dateFrom = p.getDate_from();
                 Date dateTo=p.getDate_to();
                 if(dateTo==null){

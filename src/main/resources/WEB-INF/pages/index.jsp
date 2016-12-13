@@ -47,9 +47,8 @@
                     <!-- Collect the nav links, forms, and other content for toggling -->
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul id="groupList" class="nav navbar-nav">
-
+                            <li><button type="button" id="orders" class="btn btn-default navbar-btn">Orders</button></li>
                             <sec:authorize access="hasRole('ADMIN')">
-                                <li><button type="button" id="orders" class="btn btn-default navbar-btn">Orders</button></li>
                                 <li><button type="button" id="pricing_upload" class="btn btn-default navbar-btn">Pricing upload</button></li>
                                 <li><button type="button" id="calendar_upload" class="btn btn-default navbar-btn">Calendar upload</button></li>
                                 <li><button type="button" id="apartments" class="btn btn-default navbar-btn">Apartments</button></li>

@@ -1,8 +1,6 @@
 package com.petro.apartments.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.hibernate.annotations.*;
-
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -21,17 +19,12 @@ public class Order {
 
     @Temporal(value = TemporalType.TIMESTAMP)
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="MM-dd-yyyy HH:mm:ss")
-//    @NotNull
     private Date order_date;
-//    @NotNull
+
     @OneToMany(mappedBy="order", orphanRemoval = true, fetch = FetchType.EAGER, cascade = {CascadeType.MERGE,CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
-//    @Cascade({org.hibernate.annotations.CascadeType.PERSIST,
-//            org.hibernate.annotations.CascadeType.MERGE,
-//            org.hibernate.annotations.CascadeType.DELETE,
-//            org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+//    @OneToMany(mappedBy="order", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Booking> bookings = new HashSet<>();
 
-//    @ManyToMany(mappedBy="orders", fetch = FetchType.EAGER,cascade=CascadeType.ALL)
     @ManyToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL})
     @JoinTable(name="order_apartment",
             joinColumns={@JoinColumn(name="order_id")},
@@ -40,16 +33,12 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name="client_id")
-//    @NotNull
     private Client client;
-//    @NotNull
+
     private Double price;
-//    @NotNull
     private Integer discount;
     @Column(name = "final_price")
-//    @NotNull
     private Double finalPrice;
-//    @NotNull
     private String registrator;
     public Order(){
 
@@ -161,9 +150,7 @@ public class Order {
         apartment.getOrders().remove(this);
     }
     public void removeApartments() {
-//        for (Apartment a: new HashSet<>(apartments) ){
-//            removeApartment(a);
-//        }
+
         Iterator<Apartment> i = apartments.iterator();
         while (i.hasNext()) {
             Apartment a = i.next();
@@ -180,13 +167,11 @@ public class Order {
         i.remove();
     }
     public void removeBookings() {
-//        for (Booking b: new HashSet<>(bookings)) {
-//            removeBooking(b);
-//        }
+
         Iterator<Booking> i = bookings.iterator();
         while (i.hasNext()) {
             Booking b = i.next();
-            b.setOrder(null);
+//            b.setOrder(null);
             i.remove();
         }
     }
